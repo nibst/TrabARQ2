@@ -24,14 +24,13 @@ void emulaCMD()
         printf("%s", dirName);
         printf("/>");
         fgets(instruction, 300, stdin);
-        //chama funcao que analisa se ta correto o comando
+        //se o primeiro caractere não for enter
         if (instruction[0] != 10)
         {
             if (checkCommand(instruction))
                 printf("INVALID COMMAND");
             printf("\n");
         }
-
     }
 }
 
