@@ -1,32 +1,61 @@
+#define NUM_INDICES 256
+#define NUM_CLUSTERS 256
+#define CLUSTER_SIZE 32768
+#define CLUSTER_TYPE_DATA 0x01
+#define CLUSTER_TYPE_DIRECTORY_TABLE 0x02
+#define TAM_NOME_MAX 256
+#define TAM_EXTENSAO 4 //uma a mais pro fim de string
+#define NUM_METAFILES 100
+typedef unsigned short WORD;//2bytes
+typedef unsigned char BYTE;//1byte
 typedef struct MetaDados
-{                                 //usei char para guardar pois eh o unico tipo de 1 byte
-    unsigned char TamanhoIndice;  //Tamanho do índice (quantas entradas o índice possui, utilizar o valor 2^8)
-    unsigned char TamanhoCluster; //Tamanho do cluster (utilizar o valor 32KB)
-    unsigned char InicioIndices;  //Byte onde o índice inicia (metadados iniciam no byte zero e vão até byte 3) (recebe 4 então)
-    unsigned char PrimCluster;    //Byte onde inicia o primeiro cluster (TamanhoIndice + InicioIndices)
-} metadados;
-
-typedef struct Index
 {
-    unsigned char Indice;
-} index;
+    //usei WORD para guardar pois eh o unico tipo de 2 byte
+    WORD tamanho_indice;  //Tamanho do índice (quantas entradas o índice possui, utilizar o valor 2^8)
+    WORD tamanho_cluster; //Tamanho do cluster (utilizar o valor 32KB)
+    WORD inicio_indices;  //Byte onde o índice inicia (metadados iniciam no byte zero e vão até byte 3) (recebe 4 então)
+    WORD prim_cluster;    //Byte onde inicia o primeiro cluster (TamanhoIndice + InicioIndices)
+} metaDados;
 
+typedef struct MetaFiles
+{
+    BYTE valida;
+    char nome_file[TAM_NOME_MAX];
+    char extensao[TAM_EXTENSAO];
+    BYTE cluster_inicial;//que cluster q começa a file
+}metaFiles;
+typedef struct DirectoryFile
+{
+    BYTE valida;//se for valida é 1, se não é 0, ser 0 seria basicamente remover
+    char nomeDir[TAM_NOME_MAX];
+    char extensao[TAM_EXTENSAO];
+    metaFiles metafiles[NUM_METAFILES];//sla quantos, pode ter varios dps calculo
+}directoryFile;
+
+//tem que ter 32kb
 typedef struct Cluster
 {
-    //esse aqui a gente precisa combinar como que vai ser estruturado
-} cluster;
+    BYTE cluster_type;//como vai ser interpretado os dados a seguir
+    BYTE conteudo[CLUSTER_SIZE - (2 * sizeof(BYTE))];
+    BYTE cluster_number;//cluster em que está->vai checar a tabela de indices e apontar pro proximo cluster
+}cluster;
 
-typedef struct Arquivo
+typedef struct FileSystem
 {
-    metadados meta;
-    index indice[128];
-    cluster Clusters[128];
-} arquivo;
+    metaDados meta;
+    BYTE indice[NUM_INDICES];//TODO colocar como constante, o indice i aponta o proximo cluster do cluster de numero i.
+    cluster clusters[NUM_CLUSTERS];//TODO colocar como constante
+} fileSystem;
 
-void inicializaMetadados(metadados *meta);
+void inicializaMetadados(metaDados *meta);
 
-void inicializaIndex(index *ind);
+void inicializaIndex(BYTE *ind);
 
-void inicializaCluster(cluster *clus);
+void inicializaClusters(cluster *clus);
 
-void inicializaarquivo(arquivo *arq);
+void inicializaArquivo(fileSystem *arq);
+
+//fazer funcao de ler e armazenar arquivo binario
+int writeFileSystem(fileSystem *arq);
+
+int readFileSystem(fileSystem *arq);

@@ -1,4 +1,5 @@
 #include "commands.h"
+#include "arquivos.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -41,6 +42,8 @@ Arguments get_command_and_args(char *instruction_line)
 
 void emulaCMD()
 {
+    /*!!!tem um bug que as vezes para no meio por motivos desconhecidos!!!*/
+
     char dirName[] = "dir";
     char *instruction_line = (char *)malloc((sizeof(char) * MAX_INSTRUCTION_SIZE) + 1) ;
     int i;
@@ -80,6 +83,10 @@ int main()
 
     //inicializar a estrutura de arquivos de dados
     //emular o cmd, fazer coisas tipo root\dir> <tal comando>
-    emulaCMD();
+    //emulaCMD();
+    fileSystem *arq = (fileSystem *)malloc(sizeof(fileSystem));
+    inicializaArquivo(arq);
+    writeFileSystem(arq);
+    printf("%d",sizeof(fileSystem));
     return 0;
 }

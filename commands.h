@@ -23,7 +23,7 @@ typedef struct type_command
 
 //só teste das funcoes, nao implementar elas aqui, so colocar header
 void CD_function(Arguments *arguments){
-    printf("dale\n")
+    printf("dale\n");
     return;
 }
 void DIR_function(Arguments *arguments){
@@ -39,7 +39,7 @@ void RENAME_function(Arguments *arguments);
 Command commands[] =
     {
         {
-            "CD",
+            .name = "CD",
             .expected_args = 1u,
             .func = &CD_function
         },
