@@ -1,0 +1,53 @@
+#include "commands.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+
+void CD_function(Arguments *arguments){
+    printf("dale\n");
+}
+
+Command commands[] =
+    {
+        {
+            .name = "CD",
+            .expected_args = 1u,
+            .func = &CD_function
+        },
+        {
+            .name = "DIR",
+            .expected_args = 0u,
+            //.func = &DIR_function
+        },
+        {
+            .name = "RM",
+            .expected_args = 1u,
+            //.func = &RM_function
+        },
+        {
+            .name = "MKDIR",
+            .expected_args = 1u,
+            //.func = &MKDIR_function
+        },
+        {
+            .name = "MKFILE",
+            .expected_args = 1u,
+            //.func = &MKFILE_function
+        },
+        {
+            .name = "EDIT",
+            .expected_args = 2u,
+            //.func = &EDIT_function
+        },
+        {
+            .name = "MOVE",
+            .expected_args = 2u,
+            //.func = &MOVE_function
+        },
+        {
+            .name = "RENAME",
+            .expected_args = 2u,
+            //.func = &RENAME_function
+        }
+    };

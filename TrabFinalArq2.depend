@@ -1,0 +1,25 @@
+# depslib dependency file v1.0
+1633929482 source:c:\users\nikol\onedrive\documentos\ufrgs\arq2\trabfinalarq2\main.c
+	"commands.h"
+	"arquivos.h"
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+
+1633927971 c:\users\nikol\onedrive\documentos\ufrgs\arq2\trabfinalarq2\commands.h
+
+1633903793 source:c:\users\nikol\onedrive\documentos\ufrgs\arq2\trabfinalarq2\arquivos.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"arquivos.h"
+
+1633902170 c:\users\nikol\onedrive\documentos\ufrgs\arq2\trabfinalarq2\arquivos.h
+
+1633922793 source:c:\users\nikol\onedrive\documentos\ufrgs\arq2\trabfinalarq2\commands.c
+	"commands.h"
+	"arquivos.h"
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+
