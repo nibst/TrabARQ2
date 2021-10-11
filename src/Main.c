@@ -7,7 +7,7 @@
 #define ROOTNAME "root"
 #define MAX_INSTRUCTION_SIZE 1000
 
-//sÛ os espaÁos em branco da esquerda
+//s√≥ os espa√ßos em branco da esquerda
 char* leftTrim(char *args)
 
 {
@@ -27,7 +27,7 @@ Arguments get_command_and_args(char *instruction_line)
     Arguments instruction;
     instruction.num_args = 0u;
     instruction.command_name = strtok(instruction_line_copy, " ");
-    //se n„o h· argumentos
+    //se n√£o h√° argumentos
    if (instruction.command_name[strlen(instruction.command_name) - 1] == '\n')
         //tira o \n, bota um null no lugar
         instruction.command_name[strlen(instruction.command_name) - 1] = 0;
@@ -36,13 +36,13 @@ Arguments get_command_and_args(char *instruction_line)
     {
 
         //pega os argumentos, todos juntos tho, com o \n no final
-        instruction.args = instruction_line; //+ strlen(instruction.command_name)+1;
+        instruction.args = instruction_line + strlen(instruction.command_name)+1;
         //tirar o \n
         if (instruction.args[strlen(instruction.args) - 1] == '\n')
         //tira o \n, bota um null no lugar
             instruction.args[strlen(instruction.args) - 1] = 0;
        instruction.args = leftTrim(instruction.args);
-        //!fazer uma funcao para contar os argumentos, considerar argumento entre aspas como um sÛ -> comando editar
+        //!fazer uma funcao para contar os argumentos, considerar argumento entre aspas como um s√≥ -> comando editar
     }
     //free(instruction_line_copy);
     return instruction;
@@ -57,11 +57,11 @@ void emulaCMD()
     {
         printf(ROOTNAME);
         /*
-          aqui pega o diretorio que est· atualmente
+          aqui pega o diretorio que est√° atualmente
         */
         printf(">");
         fgets(instruction_line, MAX_INSTRUCTION_SIZE, stdin);
-        //se o primeiro caractere n„o for enter
+        //se o primeiro caractere n√£o for enter
         if (instruction_line[0] != 10)
         {
             Arguments instruction = get_command_and_args(instruction_line);
