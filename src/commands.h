@@ -1,16 +1,11 @@
-
-
-///             Arquitetura e Organiza√ß√£o de Computadores II
+///             Arquitetura e OrganizaÁ„o de Computadores II
 ///                   Trabalho 2: Light File System
 ///
 ///             Alunos:
-///                     (00326477)  Felipe Kaiser Schnitzler    
-///                     (00323741)  N√≠kolas Pad√£o               
-///                     (00275960)  Pedro Afonso Tremea Serpa   
+///                     (00326477)  Felipe Kaiser Schnitzler
+///                     (00323741)  NÌkolas Pad„o
+///                     (00275960)  Pedro Afonso Tremea Serpa
 ///                     (00xxxxxx)  Ricardo
-
-
-
 
 #define NCOMMANDS 8
 
@@ -22,6 +17,7 @@ typedef struct type_args
     char *args;                 //argumentos do comando que usuario digitou
     char *command_name;         //comando que usuario digitou
     unsigned int num_args;      //numero de argumentos que usuario digitou
+    unsigned char cluster_atual; //a partir de que cluster executar as funcoes
 } Arguments;
 
 typedef struct type_command
@@ -32,7 +28,7 @@ typedef struct type_command
 } Command;
 
 
-//s√≥ teste das funcoes, nao implementar elas aqui, so colocar header
+//sÛ teste das funcoes, nao implementar elas aqui, so colocar header
 int CD_function(Arguments *arguments);
 int DIR_function(Arguments *arguments);
 int RM_function(Arguments *arguments);
