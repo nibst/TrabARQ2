@@ -1,17 +1,3 @@
-
-
-///             Arquitetura e Organiza√ß√£o de Computadores II
-///                   Trabalho 2: Light File System
-///
-///             Alunos:
-///                     (00326477)  Felipe Kaiser Schnitzler    
-///                     (00323741)  N√≠kolas Pad√£o               
-///                     (00275960)  Pedro Afonso Tremea Serpa   
-///                     (00xxxxxx)  Ricardo
-
-
-
-
 #include "commands.h"
 #include "arquivos.h"
 #include <stdio.h>
@@ -45,7 +31,7 @@ int CD_function(Arguments *arguments)
     readFileSystem(arq);
 
     /*TODO
-     fazer func para testa se o numero de argumentos est√° de acordo
+     fazer func para testa se o numero de argumentos est· de acordo
     */
     //nao vai precisa desse teste de null quando tiver a funcao de testa numero de arg
     if((dirName = strtok(path,"/"))!=NULL)
@@ -62,12 +48,12 @@ int CD_function(Arguments *arguments)
     {
         memcpy(dir,arq->clusters[i].conteudo,sizeof(directoryFile));
         j=0;
-        match = 0;//match √© variavel para dizer se achou o dir procurado
+        match = 0;//match È variavel para dizer se achou o dir procurado
         while(j<NUM_METAFILES && !match)
         {
-            /*  1-se a metafile for invalida nem olha, se for valida checar se √© extensao dir
-                2-checar se √© extensao dir, strcmp retorna 0 se forem iguais
-                3-checar se √© o mesmo nome de diretorio*/
+            /*  1-se a metafile for invalida nem olha, se for valida checar se È extensao dir
+                2-checar se È extensao dir, strcmp retorna 0 se forem iguais
+                3-checar se È o mesmo nome de diretorio*/
             if((validMetafile(dir->metafiles[j])) && (isDirectory(dir->metafiles[j])) && (matchesDirName(dir->metafiles[j],dirName)))
                 match = 1;
             j++;

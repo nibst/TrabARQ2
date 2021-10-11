@@ -1,17 +1,3 @@
-
-
-///             Arquitetura e Organização de Computadores II
-///                   Trabalho 2: Light File System
-///
-///             Alunos:
-///                     (00326477)  Felipe Kaiser Schnitzler    
-///                     (00323741)  Níkolas Padão               
-///                     (00275960)  Pedro Afonso Tremea Serpa   
-///                     (00xxxxxx)  Ricardo
-
-
-
-
 #define NCOMMANDS 8
 
 struct type_command;
@@ -32,7 +18,7 @@ typedef struct type_command
 } Command;
 
 
-//só teste das funcoes, nao implementar elas aqui, so colocar header
+//s� teste das funcoes, nao implementar elas aqui, so colocar header
 int CD_function(Arguments *arguments);
 int DIR_function(Arguments *arguments);
 int RM_function(Arguments *arguments);
