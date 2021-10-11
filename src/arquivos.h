@@ -69,3 +69,18 @@ int getFirstCluster(cluster *clus);
 
 //retorna o indice do 1 cluster vazio, EOF caso ocorra algum erro
 int getEmptyCluster();
+
+//retorna o cluster correspondente ao indice x
+cluster buscarCluster(index x);
+
+//retorna o indice do arquivo/dir com o nome[] dentro de *dir, EOF para erro
+BYTE getArq(DirectoryFile *dir, char nome[]);
+
+//retorna o endereco do 1 byte do cluster de indice x(ex calcEndCluster(0) = 264)
+int calcEndCluster(index x);
+
+//aloca um cluster na memoria e retorna os metadados a serem inseridos no diretorio pai
+metaFiles criaCluster(char nome[],char extensao[]);
+
+//muda o valor do index para novoEstado(VAZIO,EOF,PONTEIRO), retorna 0 caso ocorra algum erro, senao retorna 1
+int mudaEstadoIndex(BYTE index, BYTE novoEstado);
