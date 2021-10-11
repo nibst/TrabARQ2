@@ -1,3 +1,18 @@
+
+
+///             Arquitetura e Organização de Computadores II
+///                   Trabalho 2: Light File System
+///
+///             Alunos:
+///                     (00326477)  Felipe Kaiser Schnitzler    
+///                     (00323741)  Níkolas Padão               
+///                     (00275960)  Pedro Afonso Tremea Serpa   
+///                     (00xxxxxx)  Ricardo
+
+
+
+
+
 #define NUM_INDICES 256
 #define NUM_CLUSTERS 256
 #define CLUSTER_SIZE 32768
