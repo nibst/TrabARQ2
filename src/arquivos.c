@@ -1,15 +1,11 @@
-
-
-///             Arquitetura e Organiza√ß√£o de Computadores II
+///             Arquitetura e OrganizaÁ„o de Computadores II
 ///                   Trabalho 2: Light File System
 ///
 ///             Alunos:
-///                     (00326477)  Felipe Kaiser Schnitzler    
-///                     (00323741)  N√≠kolas Pad√£o               
-///                     (00275960)  Pedro Afonso Tremea Serpa   
+///                     (00326477)  Felipe Kaiser Schnitzler
+///                     (00323741)  NÌkolas Pad„o
+///                     (00275960)  Pedro Afonso Tremea Serpa
 ///                     (00xxxxxx)  Ricardo
-
-
 
 
 #include <stdio.h>
@@ -40,37 +36,35 @@ void inicializaClusters(cluster *clus)
 {
     int i;
     int j;
-    //cluster 0 simboliza cluster vazio e tamb√©m cont√©m o root
+    //cluster 0 simboliza cluster vazio e tambÈm contÈm o root
     //primeiro cluster tem o root directory (padrao)
     directoryFile *root = (directoryFile*)malloc(sizeof(directoryFile));
     strcpy(root->nomeDir,"root");
     strcpy(root->extensao,"dir");
     for(i=0; i<NUM_METAFILES; i++)
-        root->metafiles[i].valida = INVALIDO;//todas metafiles inv√°lidas
-
+        root->metafiles[i].valida = INVALIDO;//todas metafiles inv·lidas
 
     clus[0].cluster_type = CLUSTER_TYPE_DIRECTORY_TABLE;
     clus[0].cluster_number = VALIDO;
+
+    root->metafiles[0].valida = VALIDO;
+    root->metafiles[0].cluster_inicial = VAZIO;//È um dir vazio
+    strcpy(root->metafiles[0].nome_file,"algo");
+    strcpy(root->metafiles[0].extensao,"dir");
+
     memcpy(clus[0].conteudo,root, sizeof(directoryFile));
 
-    for(i = 0; i< NUM_CLUSTERS; i++)
+    for(i = 1; i< NUM_CLUSTERS; i++)
     {
         clus[i].cluster_number = i;
         for(j = 1; j<CLUSTER_SIZE-2; j++)
             clus[i].conteudo[j] = 'x';//!!so para vizualizar lugares "sem nada", depois tirar isso!!
 
     }
+
     free(root);
 }
 
-void inicializaArquivo(fileSystem *arq)
-{
-
-    inicializaMetadados(&(arq->meta));
-    inicializaIndex(arq->indice);
-    inicializaClusters((arq->clusters));
-
-}
 int writeFileSystem(fileSystem *arq)
 {
     FILE *arqDados;
@@ -110,7 +104,14 @@ int readFileSystem(fileSystem *arq)
     fclose(arqDados);
     return 0;
 }
+void inicializaArquivo(fileSystem *arq)
+{
+    inicializaMetadados(&(arq->meta));
+    inicializaIndex(arq->indice);
+    inicializaClusters((arq->clusters));
+    writeFileSystem(arq);
 
+}
 //nao sei se essa func vai ser necessaria
 int getFirstCluster(cluster *clus)
 {

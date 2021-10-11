@@ -1,16 +1,11 @@
-
-
-///             Arquitetura e OrganizaÃ§Ã£o de Computadores II
+///             Arquitetura e Organização de Computadores II
 ///                   Trabalho 2: Light File System
 ///
 ///             Alunos:
-///                     (00326477)  Felipe Kaiser Schnitzler    
-///                     (00323741)  NÃ­kolas PadÃ£o               
-///                     (00275960)  Pedro Afonso Tremea Serpa   
+///                     (00326477)  Felipe Kaiser Schnitzler
+///                     (00323741)  Níkolas Padão
+///                     (00275960)  Pedro Afonso Tremea Serpa
 ///                     (00xxxxxx)  Ricardo
-
-
-
 
 #include "commands.h"
 #include "arquivos.h"
@@ -29,6 +24,10 @@ int matchesDirName(metaFiles meta, char *dirName)
 {
     return (!(strcmp(meta.nome_file,dirName)));
 }
+
+/*
+retorna 0 caso de certo
+retorna 1 caso de errado*/
 int CD_function(Arguments *arguments)
 {
 
@@ -44,30 +43,28 @@ int CD_function(Arguments *arguments)
     directoryFile *dir = (directoryFile *)malloc(sizeof(directoryFile));
     readFileSystem(arq);
 
-    /*TODO
-     fazer func para testa se o numero de argumentos estÃ¡ de acordo
-    */
-    //nao vai precisa desse teste de null quando tiver a funcao de testa numero de arg
-    if((dirName = strtok(path,"/"))!=NULL)
+    if (arguments->num_args != arguments->owner-> expected_args)
     {
-        //se o primeiro argumento for diferente de root
-        if((strcmp("root",dirName)))
-        {
-            printf("[ERROR] invalid path '%s'\n",arguments->args);
-            return 1;
-        }
+        printf("[ERROR] Expected %u arguments but got %u: '%s'\n",arguments->owner-> expected_args, arguments->num_args, arguments->args);
+        return 1;
     }
-
+    dirName = strtok(path,"/");
+    //se o primeiro argumento for diferente de root
+    if((strcmp("root",dirName)))
+    {
+        printf("[ERROR] invalid path '%s'\n",arguments->args);
+        return -1;
+    }
     while(((dirName = strtok(NULL,"/")) != NULL) && (match == 1))
     {
         memcpy(dir,arq->clusters[i].conteudo,sizeof(directoryFile));
         j=0;
-        match = 0;//match Ã© variavel para dizer se achou o dir procurado
+        match = 0;//match é variavel para dizer se achou o dir procurado
         while(j<NUM_METAFILES && !match)
         {
-            /*  1-se a metafile for invalida nem olha, se for valida checar se Ã© extensao dir
-                2-checar se Ã© extensao dir, strcmp retorna 0 se forem iguais
-                3-checar se Ã© o mesmo nome de diretorio*/
+            /*  1-se a metafile for invalida nem olha, se for valida checar se é extensao dir
+                2-checar se é extensao dir, strcmp retorna 0 se forem iguais
+                3-checar se é o mesmo nome de diretorio*/
             if((validMetafile(dir->metafiles[j])) && (isDirectory(dir->metafiles[j])) && (matchesDirName(dir->metafiles[j],dirName)))
                 match = 1;
             j++;
@@ -82,7 +79,7 @@ int CD_function(Arguments *arguments)
             return 1;
         }
     }
-
+    arguments->cluster_atual = i;
     free(arq);
     free(dir);
     free(path);

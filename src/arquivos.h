@@ -1,16 +1,11 @@
-
-
 ///             Arquitetura e Organização de Computadores II
 ///                   Trabalho 2: Light File System
 ///
 ///             Alunos:
-///                     (00326477)  Felipe Kaiser Schnitzler    
-///                     (00323741)  Níkolas Padão               
-///                     (00275960)  Pedro Afonso Tremea Serpa   
+///                     (00326477)  Felipe Kaiser Schnitzler
+///                     (00323741)  Níkolas Padão
+///                     (00275960)  Pedro Afonso Tremea Serpa
 ///                     (00xxxxxx)  Ricardo
-
-
-
 
 
 #define NUM_INDICES 256
@@ -72,12 +67,12 @@ void inicializaIndex(BYTE *ind);
 
 void inicializaClusters(cluster *clus);
 
-void inicializaArquivo(fileSystem *arq);
-
 //fazer funcao de ler e armazenar arquivo binario
 int writeFileSystem(fileSystem *arq);
 
 int readFileSystem(fileSystem *arq);
+
+void inicializaArquivo(fileSystem *arq);
 
 //seila se sequer precisa disso
 int getFirstCluster(cluster *clus);
