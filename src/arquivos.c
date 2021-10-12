@@ -1,9 +1,9 @@
-///             Arquitetura e Organização de Computadores II
+///             Arquitetura e Organizaï¿½ï¿½o de Computadores II
 ///                   Trabalho 2: Light File System
 ///
 ///             Alunos:
 ///                     (00326477)  Felipe Kaiser Schnitzler
-///                     (00323741)  Níkolas Padão
+///                     (00323741)  Nï¿½kolas Padï¿½o
 ///                     (00275960)  Pedro Afonso Tremea Serpa
 ///                     (00xxxxxx)  Ricardo
 
@@ -36,19 +36,20 @@ void inicializaClusters(cluster *clus)
 {
     int i;
     int j;
-    //cluster 0 simboliza cluster vazio e também contém o root
+    //cluster 0 simboliza cluster vazio e tambï¿½m contï¿½m o root
     //primeiro cluster tem o root directory (padrao)
     directoryFile *root = (directoryFile*)malloc(sizeof(directoryFile));
+    memset(root,'x',sizeof(directoryFile));
     strcpy(root->nomeDir,"root");
     strcpy(root->extensao,"dir");
     for(i=0; i<NUM_METAFILES; i++)
-        root->metafiles[i].valida = INVALIDO;//todas metafiles inválidas
+        root->metafiles[i].valida = INVALIDO;//todas metafiles invï¿½lidas
 
     clus[0].cluster_type = CLUSTER_TYPE_DIRECTORY_TABLE;
     clus[0].cluster_number = VALIDO;
 
     root->metafiles[0].valida = VALIDO;
-    root->metafiles[0].cluster_inicial = VAZIO;//é um dir vazio
+    root->metafiles[0].cluster_inicial = VAZIO;//ï¿½ um dir vazio
     strcpy(root->metafiles[0].nome_file,"algo");
     strcpy(root->metafiles[0].extensao,"dir");
 

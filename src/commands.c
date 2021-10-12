@@ -1,9 +1,9 @@
-///             Arquitetura e Organização de Computadores II
+///             Arquitetura e Organizaï¿½ï¿½o de Computadores II
 ///                   Trabalho 2: Light File System
 ///
 ///             Alunos:
 ///                     (00326477)  Felipe Kaiser Schnitzler
-///                     (00323741)  Níkolas Padão
+///                     (00323741)  Nï¿½kolas Padï¿½o
 ///                     (00275960)  Pedro Afonso Tremea Serpa
 ///                     (00xxxxxx)  Ricardo
 
@@ -36,7 +36,7 @@ int CD_function(Arguments *arguments)
     int i = 0;
     int j;
     int match = 1;
-    char *path = (char *)malloc(sizeof(char) * strlen(arguments->args));
+    char *path = (char *)malloc(sizeof(char) * (strlen(arguments->args))+1);
     //fazer copia da linha pq strtok modifica ela
     strcpy(path, arguments->args);
 
@@ -53,18 +53,18 @@ int CD_function(Arguments *arguments)
     if((strcmp("root",dirName)))
     {
         printf("[ERROR] invalid path '%s'\n",arguments->args);
-        return -1;
+        return 1;
     }
     while(((dirName = strtok(NULL,"/")) != NULL) && (match == 1))
     {
         memcpy(dir,arq->clusters[i].conteudo,sizeof(directoryFile));
         j=0;
-        match = 0;//match é variavel para dizer se achou o dir procurado
+        match = 0;//match ï¿½ variavel para dizer se achou o dir procurado
         while(j<NUM_METAFILES && !match)
         {
-            /*  1-se a metafile for invalida nem olha, se for valida checar se é extensao dir
-                2-checar se é extensao dir, strcmp retorna 0 se forem iguais
-                3-checar se é o mesmo nome de diretorio*/
+            /*  1-se a metafile for invalida nem olha, se for valida checar se ï¿½ extensao dir
+                2-checar se ï¿½ extensao dir, strcmp retorna 0 se forem iguais
+                3-checar se ï¿½ o mesmo nome de diretorio*/
             if((validMetafile(dir->metafiles[j])) && (isDirectory(dir->metafiles[j])) && (matchesDirName(dir->metafiles[j],dirName)))
                 match = 1;
             j++;
