@@ -1,9 +1,9 @@
-///             Arquitetura e OrganizaÁ„o de Computadores II
+///             Arquitetura e Organiza√ß√£o de Computadores II
 ///                   Trabalho 2: Light File System
 ///
 ///             Alunos:
 ///                     (00326477)  Felipe Kaiser Schnitzler
-///                     (00323741)  NÌkolas Pad„o
+///                     (00323741)  N√≠kolas Pad√£o
 ///                     (00275960)  Pedro Afonso Tremea Serpa
 ///                     (00xxxxxx)  Ricardo
 
@@ -12,15 +12,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-int validMetafile(metaFiles meta)
+
+int validMetafile(MetaFiles meta)
 {
     return meta.valida == VALIDO;
 }
-int isDirectory(metaFiles meta)
+
+int isDirectory(MetaFiles meta)
 {
     return (!(strcmp(meta.extensao,"dir")));
 }
-int matchesDirName(metaFiles meta, char *dirName)
+
+int matchesDirName(MetaFiles meta, char *dirName)
 {
     return (!(strcmp(meta.nome_file,dirName)));
 }
@@ -31,16 +34,18 @@ retorna 1 caso de errado*/
 int CD_function(Arguments *arguments)
 {
 
-    fileSystem *arq = (fileSystem *)malloc(sizeof(fileSystem));
+    FileSystem *arq = (FileSystem *)malloc(sizeof(FileSystem));
+    
     char *dirName;
     int i = 0;
     int j;
     int match = 1;
     char *path = (char *)malloc(sizeof(char) * strlen(arguments->args));
+    
     //fazer copia da linha pq strtok modifica ela
     strcpy(path, arguments->args);
 
-    directoryFile *dir = (directoryFile *)malloc(sizeof(directoryFile));
+    DirectoryFile *dir = (DirectoryFile *)malloc(sizeof(DirectoryFile));
     readFileSystem(arq);
 
     if (arguments->num_args != arguments->owner-> expected_args)
@@ -59,12 +64,13 @@ int CD_function(Arguments *arguments)
     {
         memcpy(dir,arq->clusters[i].conteudo,sizeof(directoryFile));
         j=0;
-        match = 0;//match È variavel para dizer se achou o dir procurado
+        match = 0;//match √© variavel para dizer se achou o dir procurado
+        
         while(j<NUM_METAFILES && !match)
         {
-            /*  1-se a metafile for invalida nem olha, se for valida checar se È extensao dir
-                2-checar se È extensao dir, strcmp retorna 0 se forem iguais
-                3-checar se È o mesmo nome de diretorio*/
+            /*  1-se a metafile for invalida nem olha, se for valida checar se √© extensao dir
+                2-checar se √© extensao dir, strcmp retorna 0 se forem iguais
+                3-checar se √© o mesmo nome de diretorio */
             if((validMetafile(dir->metafiles[j])) && (isDirectory(dir->metafiles[j])) && (matchesDirName(dir->metafiles[j],dirName)))
                 match = 1;
             j++;
@@ -86,6 +92,14 @@ int CD_function(Arguments *arguments)
     return 0;
 }
 
+DIR_function(Arguments *arguments)
+{
+    FileSystem *arq = (FileSystem *)malloc(sizeof(FileSystem));
+    char *dirName;
+    
+
+}
+
 Command commands[NCOMMANDS] =
 {
     {
@@ -96,7 +110,7 @@ Command commands[NCOMMANDS] =
     {
         .name = "DIR",
         .expected_args = 0u,
-        //.func = &DIR_function
+        .func = &DIR_function
     },
     {
         .name = "RM",
