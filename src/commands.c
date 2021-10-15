@@ -95,10 +95,18 @@ int CD_function(Arguments *arguments)
 DIR_function(Arguments *arguments)
 {
     FileSystem *arq = (FileSystem *)malloc(sizeof(FileSystem));
-    char *dirName;
+    
+    indice = arguments.cluster_atual
+        
+    // pega o arquivo e anda 256(tabela fat) + 32k*indice posições pra chegar na pasta
+    // Verifica se é pasta nos metadados
+    // anda mais metadados de pasta posições
+    // enquanto não chegar no fim da pasta...
+             // print nome do arquivo, anda mais meta do arquivo. repete 
     
 
 }
+
 
 Command commands[NCOMMANDS] =
 {
