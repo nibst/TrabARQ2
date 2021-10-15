@@ -20,59 +20,67 @@
 #define VALIDO 0x01
 #define VAZIO 0x00
 #define END_OF_FILE 0xFF
+
 typedef unsigned short WORD;//2bytes
 typedef unsigned char BYTE;//1byte
-typedef struct MetaDados
+
+typedef struct Type_MetaDados
 {
     //usei WORD para guardar pois eh o unico tipo de 2 byte
     WORD tamanho_indice;  //Tamanho do índice (quantas entradas o índice possui, utilizar o valor 2^8)
     WORD tamanho_cluster; //Tamanho do cluster (utilizar o valor 32KB)
     WORD inicio_indices;  //Byte onde o índice inicia (metadados iniciam no byte zero e vão até byte 3) (recebe 4 então)
     WORD prim_cluster;    //Byte onde inicia o primeiro cluster (TamanhoIndice + InicioIndices)
-} metaDados;
 
-typedef struct MetaFiles
+}MetaDados;
+
+typedef struct Type_MetaFiles
 {
     BYTE valida;//se for valida é 1, se não é 0, ser 0 seria basicamente remover,
     char nome_file[TAM_NOME_MAX];
     char extensao[TAM_EXTENSAO];
     BYTE cluster_inicial;//que cluster q começa a file
-}metaFiles;
-typedef struct DirectoryFile
+    
+}MetaFiles;
+
+typedef struct Type_DirectoryFile
 {
     //BYTE valida;//se for valida é 1, se não é 0, ser 0 seria basicamente remover, nao sei se eh necessario aqui ja que tem ja nos metafiles
     char nomeDir[TAM_NOME_MAX];
     char extensao[TAM_EXTENSAO];
     metaFiles metafiles[NUM_METAFILES];//!!sla quantos, pode ter varios dps calculo
-}directoryFile;
+    
+}DirectoryFile;
 
 //tem que ter 32kb
-typedef struct Cluster
+typedef struct Type_Cluster
 {
     BYTE cluster_type;//como vai ser interpretado os dados a seguir
     BYTE conteudo[CLUSTER_SIZE - (2 * sizeof(BYTE))];
     BYTE cluster_number;//cluster em que está->vai checar a tabela de indices e apontar pro proximo cluster
-}cluster;
+    
+}Cluster;
 
-typedef struct FileSystem
+typedef struct Type_FileSystem
 {
     metaDados meta;
     BYTE indice[NUM_INDICES];//TODO colocar como constante, o indice i aponta o proximo cluster do cluster de numero i.
     cluster clusters[NUM_CLUSTERS];//TODO colocar como constante
-} fileSystem;
+    
+} FileSystem;
 
-void inicializaMetadados(metaDados *meta);
+void inicializaMetadados(MetaDados *meta);
 
 void inicializaIndex(BYTE *ind);
 
-void inicializaClusters(cluster *clus);
+void inicializaClusters(Cluster *clus);
 
 //fazer funcao de ler e armazenar arquivo binario
-int writeFileSystem(fileSystem *arq);
+int writeFileSystem(FileSystem *arq);
 
-int readFileSystem(fileSystem *arq);
+int readFileSystem(FileSystem *arq);
 
-void inicializaArquivo(fileSystem *arq);
+void inicializaArquivo(FileSystem *arq);
 
 //seila se sequer precisa disso
-int getFirstCluster(cluster *clus);
+int getFirstCluster(Cluster *clus);
