@@ -1,9 +1,9 @@
-///             Arquitetura e OrganizaÁ„o de Computadores II
+///             Arquitetura e Organiza√ß√£o de Computadores II
 ///                   Trabalho 2: Light File System
 ///
 ///             Alunos:
 ///                     (00326477)  Felipe Kaiser Schnitzler
-///                     (00323741)  NÌkolas Pad„o
+///                     (00323741)  N√≠kolas Pad√£o
 ///                     (00275960)  Pedro Afonso Tremea Serpa
 ///                     (00xxxxxx)  Ricardo
 
@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #define CD 0
 #define DIR 1
 #define RM 2
@@ -23,7 +24,7 @@
 #define ROOTNAME "root"
 #define MAX_INSTRUCTION_SIZE 1000
 
-//sÛ os espaÁos em branco da esquerda
+//s√≥ os espa√ßos em branco da esquerda
 char* leftTrim(char *args)
 
 {
@@ -34,7 +35,8 @@ char* leftTrim(char *args)
     }
     return args;
 }
-//tira os espaÁoes em branco da direita
+
+//tira os espa√ßoes em branco da direita
 char *rightTrim(char *args)
 {
     int i = strlen(args)-1;
@@ -45,6 +47,7 @@ char *rightTrim(char *args)
     }
     return args;
 }
+
 char* trim(char *args)
 {
     args = leftTrim(args);
@@ -64,8 +67,8 @@ int countArguments(char *args)
         //passa atraves dos argumentos
         while((args[i]!= ' ') && (args[i]!= '\0'))
             i++;
-        //passa pelos espaÁos em branco entre argumentos
-        //n„o precisa testar '\0' pq args ja vai estar trimmed ent„o n„o existe
+        //passa pelos espa√ßos em branco entre argumentos
+        //n√£o precisa testar '\0' pq args ja vai estar trimmed ent√£o n√£o existe
         //como ter ' ' seguido de '\0'
         while((args[i]) == ' ')
             i++;
@@ -82,7 +85,7 @@ Arguments get_command_and_args(char *instruction_line, Arguments instruction)
     strcpy(instruction_line_copy, instruction_line);
     instruction.num_args = 0u;
     instruction.command_name = strtok(instruction_line_copy, " ");
-    //se n„o h· argumentos
+    //se n√£o h√° argumentos
    if (instruction.command_name[strlen(instruction.command_name) - 1] == '\n')
         //tira o \n, bota um null no lugar
         instruction.command_name[strlen(instruction.command_name) - 1] = '\0';
@@ -98,7 +101,7 @@ Arguments get_command_and_args(char *instruction_line, Arguments instruction)
             instruction.args[strlen(instruction.args) - 1] = '\0';
        instruction.args = trim(instruction.args);
        instruction.num_args = countArguments(instruction.args);
-        //!fazer uma funcao para contar os argumentos, considerar argumento entre aspas como um sÛ -> comando editar
+        //!fazer uma funcao para contar os argumentos, considerar argumento entre aspas como um s√≥ -> comando editar
     }
     //free(instruction_line_copy);
     return instruction;
@@ -112,6 +115,7 @@ void emulaCMD()
     BYTE ok = 1;//se rodou o comando corretamente = 0,senao = 1
     Arguments instruction;
     instruction.cluster_atual = 0x00;
+    
     while (1)
     {
         if(ok == 0 && i == CD)
@@ -120,7 +124,8 @@ void emulaCMD()
         printf("%s",dirName);
         printf(">");
         fgets(instruction_line, MAX_INSTRUCTION_SIZE, stdin);
-        //se o primeiro caractere n„o for enter
+        
+        //se o primeiro caractere n√£o for enter
         if (instruction_line[0] != 10)
         {
            instruction = get_command_and_args(instruction_line,instruction);
@@ -131,6 +136,7 @@ void emulaCMD()
                 {
                     instruction.owner = &commands[i];
                     //roda funcao daquele comando
+                    
                     ok = (commands[i].func)(&instruction);
                     //a instruction_line_copy da funcao acima vira instruction.command_name na funcao acima
                     //tem que dar free nela.
