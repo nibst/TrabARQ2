@@ -1,9 +1,9 @@
-///             Arquitetura e Organização de Computadores II
+///             Arquitetura e OrganizaÃ§Ã£o de Computadores II
 ///                   Trabalho 2: Light File System
 ///
 ///             Alunos:
 ///                     (00326477)  Felipe Kaiser Schnitzler
-///                     (00323741)  Níkolas Padão
+///                     (00323741)  NÃ­kolas PadÃ£o
 ///                     (00275960)  Pedro Afonso Tremea Serpa
 ///                     (00xxxxxx)  Ricardo
 
@@ -36,23 +36,23 @@ void inicializaClusters(cluster *clus)
 {
     int i;
     int j;
-    //cluster 0 simboliza cluster vazio e também contém o root
+    //cluster 0 simboliza cluster vazio e tambÃ©m contÃ©m o root
     //primeiro cluster tem o root directory (padrao)
-    directoryFile *root = (directoryFile*)malloc(sizeof(directoryFile));
+    DirectoryFile *root = (DirectoryFile*)malloc(sizeof(DirectoryFile));
     strcpy(root->nomeDir,"root");
     strcpy(root->extensao,"dir");
     for(i=0; i<NUM_METAFILES; i++)
-        root->metafiles[i].valida = INVALIDO;//todas metafiles inválidas
+        root->metafiles[i].valida = INVALIDO;//todas metafiles invÃ¡lidas
 
     clus[0].cluster_type = CLUSTER_TYPE_DIRECTORY_TABLE;
     clus[0].cluster_number = VALIDO;
 
     root->metafiles[0].valida = VALIDO;
-    root->metafiles[0].cluster_inicial = VAZIO;//é um dir vazio
+    root->metafiles[0].cluster_inicial = VAZIO;//Ã© um dir vazio
     strcpy(root->metafiles[0].nome_file,"algo");
     strcpy(root->metafiles[0].extensao,"dir");
 
-    memcpy(clus[0].conteudo,root, sizeof(directoryFile));
+    memcpy(clus[0].conteudo,root, sizeof(DirectoryFile));
 
     for(i = 1; i< NUM_CLUSTERS; i++)
     {
@@ -65,7 +65,7 @@ void inicializaClusters(cluster *clus)
     free(root);
 }
 
-int writeFileSystem(fileSystem *arq)
+int writeFileSystem(FileSystem *arq)
 {
     FILE *arqDados;
 
@@ -75,18 +75,19 @@ int writeFileSystem(fileSystem *arq)
         return 1;
     }
 
-    if(fwrite(arq, sizeof(fileSystem), 1, arqDados) != 1)
+    if(fwrite(arq, sizeof(FileSystem), 1, arqDados) != 1)
     {
         printf("\n*** ERRO AO TENTAR ESCREVER NO ARQUIVO***\n");
         fclose(arqDados);
         return 1;
     }
     fclose(arqDados);
+    
     return 0;
 }
 
 
-int readFileSystem(fileSystem *arq)
+int readFileSystem(FileSystem *arq)
 {
     FILE *arqDados;
 
@@ -95,16 +96,18 @@ int readFileSystem(fileSystem *arq)
         printf("\n*** ERRO AO ABRIR ARQUIVO***\n");
         return 1;
     }
-    if(fread(arq, sizeof(fileSystem), 1, arqDados) != 1)
+    if(fread(arq, sizeof(FileSystem), 1, arqDados) != 1)
     {
         printf("\n*** ERRO AO TENTAR LER DO ARQUIVO***\n");
         fclose(arqDados);
+        
         return 1;
     }
     fclose(arqDados);
+    
     return 0;
 }
-void inicializaArquivo(fileSystem *arq)
+void inicializaArquivo(FileSystem *arq)
 {
     inicializaMetadados(&(arq->meta));
     inicializaIndex(arq->indice);
@@ -113,7 +116,7 @@ void inicializaArquivo(fileSystem *arq)
 
 }
 //nao sei se essa func vai ser necessaria
-int getFirstCluster(cluster *clus)
+int getFirstCluster(Cluster *clus)
 {
     FILE *arqDados;
 
