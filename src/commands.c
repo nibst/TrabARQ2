@@ -106,7 +106,7 @@ DIR_function(Arguments *arguments)
     
     clus = fseek(arq, pos, SEEK_SET)        //Ta certo isso? seria pra salvar um cluster na memória pra consultas.
       
-    if (clus.cluster_type == ____ ) //se não for um cluster de pasta
+    if (clus.cluster_type == 1 ) //se não for um cluster de pasta
     {
         printf("VocÊ não está em uma pasta"); //Isso é mais pra marcar se vai dar algum bug, pq é pra sempre ta dentro de alguma pasta.
         
@@ -115,7 +115,7 @@ DIR_function(Arguments *arguments)
     
     else
     {
-        fseek(clus, ____, SEEK_CUR);    //Tamanho dos metadados em bytes 
+        fseek(clus, ____, SEEK_CUR);    //Tamanho dos metadados do cluster em bytes 
         fgets(nome, tam, arq);
         
         while (nome != _____)   //Enquanto não chegar no fim da pasta, talvez usar o mesmo EOF pra arquivos. Tem que ver como vai ser setado na função de criar itens na pasta  
