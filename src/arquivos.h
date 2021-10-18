@@ -63,7 +63,7 @@ typedef struct Type_Cluster
 
 typedef struct Type_FileSystem
 {
-    metaDados meta;
+    MetaDados meta;
     BYTE indice[NUM_INDICES];//TODO colocar como constante, o indice i aponta o proximo cluster do cluster de numero i.
     cluster clusters[NUM_CLUSTERS];//TODO colocar como constante
     
