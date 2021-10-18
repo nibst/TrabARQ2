@@ -96,8 +96,41 @@ DIR_function(Arguments *arguments)
 {
     FileSystem *arq = (FileSystem *)malloc(sizeof(FileSystem));
     
-    indice = arguments.cluster_atual
+    Cluster clus;
+    int     indice, pos, tam=16; //Tamanho maximo de nome a ser decidido
+    char    nome[tam];
+    
+    indice = arguments.cluster_atual;
+    pos    = 256 + (indice * 32000)    //tabela + (indice * tam cluster) 
         
+    
+    clus = fseek(arq, pos, SEEK_SET)        //Ta certo isso? seria pra salvar um cluster na memória pra consultas.
+      
+    if (clus.cluster_type == ____ ) //se não for um cluster de pasta
+    {
+        printf("VocÊ não está em uma pasta"); //Isso é mais pra marcar se vai dar algum bug, pq é pra sempre ta dentro de alguma pasta.
+        
+        return 1
+    }
+    
+    else
+    {
+        fseek(clus, ____, SEEK_CUR);    //Tamanho dos metadados em bytes 
+        fgets(nome, tam, arq);
+        
+        while (nome != _____)   //Enquanto não chegar no fim da pasta, talvez usar o mesmo EOF pra arquivos. Tem que ver como vai ser setado na função de criar itens na pasta  
+        {
+            printf("\n %s", nome);
+            fseek(clus, 1, SEEK_CUR);   //1 byte pro ponteiro da tabela FAT e parte pro próximo arquivo. 
+            fgets(nome, tam, arq);            
+        }
+        
+        return 0
+    }
+        
+        
+             
+    
     // pega o arquivo e anda 256(tabela fat) + 32k*indice posições pra chegar na pasta
     // Verifica se é pasta nos metadados
     // anda mais metadados de pasta posições
