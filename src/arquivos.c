@@ -36,16 +36,15 @@ void inicializaClusters(cluster *clus)
         root->metafiles[i].valida = INVALIDO; //todas metafiles inv�lidas
 
     clus[0].cluster_type = CLUSTER_TYPE_DIRECTORY_TABLE;
-    clus[0].cluster_number = VALIDO;
     memcpy(clus[0].conteudo, root, sizeof(directoryFile));
 
-    /*for (i = 0; i < NUM_CLUSTERS; i++)
+    for (i = 0; i < NUM_CLUSTERS; i++)
     {
         clus[i].cluster_number = i;
-        for (j = 9; j < CLUSTER_SIZE - 2; j++)
-            clus[i].conteudo[j] = 'x'; //!!so para vizualizar lugares "sem nada", depois tirar isso!!
+        //for (j = 9; j < CLUSTER_SIZE - 2; j++)
+        //clus[i].conteudo[j] = 'x'; //!!so para vizualizar lugares "sem nada", depois tirar isso!!
     }
-    free(root);*/
+    free(root);
 }
 
 void inicializaArquivo(fileSystem *arq)
@@ -124,28 +123,13 @@ int getFirstCluster(cluster *clus)
     return 0;
 }
 
-int getEmptyCluster()
+int getEmptyCluster(FILE *arqDados)
 {
-    FILE *arqDados;
     BYTE aux;
-    metaDados meta;
     int i;
 
-    if ((arqDados = fopen("arqDados", "rb")) == NULL)
+    if ((fseek(arqDados, (INI_INDICE + 1), SEEK_SET))) //comeca a procurar pelo 2 indice, pois o 1 eh sempre a root
     {
-        printf("\n*** ERRO AO ABRIR ARQUIVO***\n");
-        return END_OF_FILE;
-    }
-
-    if (fread(&meta, sizeof(metaDados), 1, arqDados) != 1) //faz a  leitura dos metadados presentes no arquivo
-    {
-        printf("\n*** ERRO AO TENTAR LER DO ARQUIVO***\n");
-        fclose(arqDados);
-        return 1;
-    }
-    if ((fseek(arqDados, (meta.inicio_indices + 1), SEEK_SET))) //comeca a procurar pelo 2 indice, pois o 1 eh sempre a root
-    {
-        printf("\n*** ERRO AO PERCORRER ARQUIVO***\n");
         return END_OF_FILE;
     }
     for (i = 1; i < NUM_INDICES; i++)
@@ -153,10 +137,110 @@ int getEmptyCluster()
         aux = fgetc(arqDados);
         if (aux == VAZIO)
         {
-            fclose(arqDados);
             return i;
         }
     }
-    fclose(arqDados);
     return END_OF_FILE;
+}
+
+//insere o cluster correspondente ao indice x em clus, retorna 1 caso ocorra algum erro
+int buscarCluster(BYTE x, cluster *clus, FILE *arqDados)
+{
+
+    if ((fseek(arqDados, calcEndCluster(x), SEEK_SET)))
+    {
+        return 1;
+    }
+
+    if (fread(clus, CLUSTER_SIZE, 1, arqDados) != 1)
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+//retorna o indice do arquivo/dir com o nome[] dentro de *dir, EOF para erro
+BYTE getArq(directoryFile *dir, char nome[])
+{
+    BYTE index;
+    int i;
+
+    for (i = 0; i < NUM_METAFILES; i++)
+    {
+        if (!strcmp(dir->metafiles[i].nome_file, nome))
+        {
+            index = dir->metafiles[i].cluster_inicial;
+            return index;
+        }
+    }
+    return END_OF_FILE;
+}
+
+//retorna o endereco do byte do cluster de indice x(ex calcEndCluster(0) = 264)
+int calcEndCluster(BYTE x)
+{
+    return (INI_ROOT + (CLUSTER_SIZE * x));
+}
+
+//aloca um cluster na memoria e escreve os metadados a serem inseridos no diretorio pai
+//nao altera o conteudo do cluster
+//retorna 1 caso ocorra algum erro
+int criaCluster(char nome[], char extensao[], metaFiles *meta, FILE *arqDados)
+{
+    BYTE index, tipocluster;
+
+    index = getEmptyCluster(arqDados);
+
+    if (index == END_OF_FILE)
+    {
+        return 1;
+    }
+
+    if (mudaEstadoIndex(index, END_OF_FILE, arqDados))
+    {
+        return 1;
+    }
+
+    if ((fseek(arqDados, calcEndCluster(index), SEEK_SET)))
+    {
+        return 1;
+    }
+
+    if (!strcmp(extensao, "dir"))
+    {
+        tipocluster = CLUSTER_TYPE_DIRECTORY_TABLE;
+    }
+    else
+    {
+        tipocluster = CLUSTER_TYPE_DATA;
+    }
+
+    if (fwrite(&tipocluster, sizeof(BYTE), 1, arqDados) != 1)
+    {
+        return 1;
+    }
+
+    meta->cluster_inicial = index;
+    strcpy(meta->extensao, extensao);
+    strcpy(meta->nome_file, nome);
+    meta->valida = 1;
+
+    return 0;
+}
+
+//muda o valor do index para novoEstado(VAZIO,EOF,PONTEIRO), retorna 1 caso ocorra algum erro, senao retorna 0
+int mudaEstadoIndex(BYTE index, BYTE novoEstado, FILE *arqDados)
+{
+    if ((fseek(arqDados, (INI_INDICE + index), SEEK_SET)))
+    {
+        return 1;
+    }
+
+    if (!fwrite(&novoEstado, sizeof(BYTE), 1, arqDados))
+    {
+        return 1;
+    }
+
+    return 0;
 }

@@ -1,9 +1,11 @@
+#include <stdio.h>
+
 #define NUM_INDICES 256
 #define NUM_CLUSTERS 256
 #define CLUSTER_SIZE 32768
 #define CLUSTER_TYPE_DATA 0x01
 #define CLUSTER_TYPE_DIRECTORY_TABLE 0x02
-#define TAM_NOME_MAX 256
+#define TAM_NOME_MAX 16
 #define TAM_EXTENSAO 4 //uma a mais pro fim de string
 #define NUM_METAFILES 100
 #define INVALIDO 0x00
@@ -68,19 +70,21 @@ int readFileSystem(fileSystem *arq);
 int getFirstCluster(cluster *clus);
 
 //retorna o indice do 1 cluster vazio, EOF caso ocorra algum erro
-int getEmptyCluster();
+int getEmptyCluster(FILE *arqDados);
 
-//retorna o cluster correspondente ao indice x
-cluster buscarCluster(index x);
+//insere o cluster correspondente ao indice x em clus, retorna 1 caso ocorra algum erro
+int buscarCluster(BYTE x, cluster *clus, FILE *arqDados);
 
 //retorna o indice do arquivo/dir com o nome[] dentro de *dir, EOF para erro
-BYTE getArq(DirectoryFile *dir, char nome[]);
+BYTE getArq(directoryFile *dir, char nome[]);
 
-//retorna o endereco do 1 byte do cluster de indice x(ex calcEndCluster(0) = 264)
-int calcEndCluster(index x);
+//retorna o endereco do byte do cluster de indice x(ex calcEndCluster(0) = 264)
+int calcEndCluster(BYTE x);
 
-//aloca um cluster na memoria e retorna os metadados a serem inseridos no diretorio pai
-metaFiles criaCluster(char nome[],char extensao[]);
+//aloca um cluster na memoria e escreve os metadados a serem inseridos no diretorio pai
+//nao altera o conteudo do cluster
+//retorna 1 caso ocorra algum erro
+int criaCluster(char nome[], char extensao[], metaFiles *meta, FILE *arqDados);
 
 //muda o valor do index para novoEstado(VAZIO,EOF,PONTEIRO), retorna 0 caso ocorra algum erro, senao retorna 1
-int mudaEstadoIndex(BYTE index, BYTE novoEstado);
+int mudaEstadoIndex(BYTE index, BYTE novoEstado, FILE *arqDados);
