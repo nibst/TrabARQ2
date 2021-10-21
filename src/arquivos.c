@@ -46,7 +46,7 @@ void inicializaClusters(Cluster *clus)
         root->metafiles[i].valida = INVALIDO; // todas metafiles inv�lidas
 
     clus[0].cluster_type = CLUSTER_TYPE_DIRECTORY_TABLE;
-    clus[0].cluster_number = VALIDO;
+    clus[0].cluster_number = 0;
 
     root->metafiles[0].valida = VALIDO;
     root->metafiles[0].cluster_inicial = VAZIO; //� um dir vazio
