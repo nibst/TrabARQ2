@@ -1,3 +1,12 @@
+///             Arquitetura e Organização de Computadores II
+///                   Trabalho 2: Light File System
+///
+///             Alunos:
+///                     (00326477)  Felipe Kaiser Schnitzler
+///                     (00323741)  Níkolas Padão
+///                     (00275960)  Pedro Afonso Tremea Serpa
+///                     (00xxxxxx)  Ricardo
+
 #define NCOMMANDS 8
 
 struct type_command;
@@ -8,6 +17,7 @@ typedef struct type_args
     char *args;                 //argumentos do comando que usuario digitou
     char *command_name;         //comando que usuario digitou
     unsigned int num_args;      //numero de argumentos que usuario digitou
+    unsigned char cluster_atual; //a partir de que cluster executar as funcoes
 } Arguments;
 
 typedef struct type_command
