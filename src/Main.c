@@ -64,7 +64,7 @@ int countArguments(char *args)
         //passa atraves dos argumentos
         while((args[i]!= ' ') && (args[i]!= '\0'))
             i++;
-        //passa pelos espa�os em branco entre argumentos
+        //passa pelos espaços em branco entre argumentos
         //não precisa testar '\0' pq args ja vai estar trimmed ent�o n�o existe
         //como ter ' ' seguido de '\0'
         while((args[i]) == ' ')
@@ -82,7 +82,7 @@ Arguments get_command_and_args(char *instruction_line, Arguments instruction)
     strcpy(instruction_line_copy, instruction_line);
     instruction.num_args = 0u;
     instruction.command_name = strtok(instruction_line_copy, " ");
-    //se n�o h� argumentos
+    //se não há argumentos
    if (instruction.command_name[strlen(instruction.command_name) - 1] == '\n')
         //tira o \n, bota um null no lugar
         instruction.command_name[strlen(instruction.command_name) - 1] = '\0';
@@ -115,7 +115,7 @@ void emulaCMD()
     instruction.cluster_atual = 0x00;
     while (1)
     {
-       
+
           if(ok == 0 && i == CD)
         {
             free(dirName);
@@ -125,7 +125,7 @@ void emulaCMD()
         printf("%s",dirName);
         printf(">");
         fgets(instruction_line, MAX_INSTRUCTION_SIZE, stdin);
-        //se o primeiro caractere n�o for enter
+        //se o primeiro caractere não for enter
         if (instruction_line[0] != 10)
         {
            instruction = get_command_and_args(instruction_line,instruction);
@@ -156,9 +156,9 @@ int main()
 
     //inicializar a estrutura de arquivos de dados
     //emular o cmd, fazer coisas tipo root\dir> <tal comando>
-    fileSystem *arq = (fileSystem *)malloc(sizeof(fileSystem));
+    FileSystem *arq = (FileSystem *)malloc(sizeof(FileSystem));
     inicializaArquivo(arq);
-
+    free(arq);
 
     emulaCMD();
 
