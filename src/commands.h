@@ -1,9 +1,9 @@
-///             Arquitetura e Organização de Computadores II
+///             Arquitetura e Organizaï¿½ï¿½o de Computadores II
 ///                   Trabalho 2: Light File System
 ///
 ///             Alunos:
 ///                     (00326477)  Felipe Kaiser Schnitzler
-///                     (00323741)  Níkolas Padão
+///                     (00323741)  Nï¿½kolas Padï¿½o
 ///                     (00275960)  Pedro Afonso Tremea Serpa
 ///                     (00xxxxxx)  Ricardo
 
@@ -28,7 +28,7 @@ typedef struct type_command
 } Command;
 
 
-//só teste das funcoes, nao implementar elas aqui, so colocar header
+//sï¿½ teste das funcoes, nao implementar elas aqui, so colocar header
 int CD_function(Arguments *arguments);
 int DIR_function(Arguments *arguments);
 int RM_function(Arguments *arguments);
