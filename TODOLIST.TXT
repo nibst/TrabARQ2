@@ -4,5 +4,7 @@ Se remover o dir que tu está agora, digamos CD root/sla, aí RM root/sla. Na no
 Funcao RM nao diferencia de diretorio de .txt, entao se tiver dir com nome algo e texto com nome algo vai dar algo estranho
 
 //MAIN
-Na main, na função de contar argumentos e tals, considerar argumentos entre aspas como só um argumento
+Na main, na função de contar argumentos e tals, considerar argumentos entre aspas como só um argumento (ricardo ja resolveu acho, só que na minha versao ainda n coloquei)
 
+//BUG 
+Tratar caso nome de file ou diretorio for maior que o nome maximo estabelecido por nós, no momento o programa só crasha
