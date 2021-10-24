@@ -46,25 +46,26 @@ void inicializaClusters(Cluster *clus)
         root->metafiles[i].valida = INVALIDO; // todas metafiles inv�lidas
 
     clus[0].cluster_type = CLUSTER_TYPE_DIRECTORY_TABLE;
-    clus[0].cluster_number = VALIDO;
-
-    root->metafiles[0].valida = VALIDO;
-    root->metafiles[0].cluster_inicial = VAZIO; //� um dir vazio
-    strcpy(root->metafiles[0].nome_file, "algo");
-    strcpy(root->metafiles[0].extensao, "dir");
+    clus[0].cluster_number = 0;
 
     memcpy(clus[0].conteudo, root, sizeof(DirectoryFile));
 
     for (i = 1; i < NUM_CLUSTERS; i++)
     {
         clus[i].cluster_number = i;
-        for (j = 1; j < CLUSTER_SIZE - 2; j++)
+        for (j = 1; j < CLUSTER_SIZE - 3; j++)
             clus[i].conteudo[j] = (i % 26) + 65; //!!so para vizualizar lugares "sem nada", depois tirar isso!!
     }
 
     free(root);
 }
-
+void inicializaArquivo(FileSystem *arq)
+{
+    inicializaMetadados(&(arq->meta));
+    inicializaIndex(arq->indice);
+    inicializaClusters((arq->clusters));
+    writeFileSystem(arq);
+}
 int writeFileSystem(FileSystem *arq)
 {
     FILE *arqDados;
@@ -103,13 +104,7 @@ int readFileSystem(FileSystem *arq)
     fclose(arqDados);
     return 0;
 }
-void inicializaArquivo(FileSystem *arq)
-{
-    inicializaMetadados(&(arq->meta));
-    inicializaIndex(arq->indice);
-    inicializaClusters((arq->clusters));
-    writeFileSystem(arq);
-}
+
 // escreve um dado de tamanho escolhido no parametro em um cluster escolhido no parametro e em certo offset dentro do cluster
 int writeBlockOfData(BYTE cluster, int offset, int sizeBlock, BYTE *data, FILE *arqDados)
 {
@@ -127,33 +122,24 @@ int writeBlockOfData(BYTE cluster, int offset, int sizeBlock, BYTE *data, FILE *
     return 0;
 }
 
-// nao sei se essa func vai ser necessaria
-int getFirstCluster(Cluster *clus)
+// pega o primeiro cluster(root)
+int getFirstCluster(Cluster *clus, FILE *arqDados)
 {
-    FILE *arqDados;
 
     if ((arqDados = fopen("arqDados", "rb")) == NULL)
     {
-        printf("\n*** ERRO AO ABRIR ARQUIVO***\n");
         return 1;
     }
     // se nao der certo fseek
-    if (!(fseek(arqDados, INI_ROOT, SEEK_SET)))
+    if ((fseek(arqDados, INI_ROOT, SEEK_SET)))
     {
-        printf("\n*** ERRO AO PERCORRER ARQUIVO***\n");
         return 1;
     }
-    else
+    // coloca o primeiro cluster em clus
+    if (fread(clus, sizeof(Cluster), 1, arqDados) != 1)
     {
-        // coloca o primeiro cluster em clus
-        if (fread(clus, sizeof(Cluster), 1, arqDados) != 1)
-        {
-            printf("\n*** ERRO AO TENTAR LER DO ARQUIVO***\n");
-            fclose(arqDados);
-            return 1;
-        }
+        return 1;
     }
-    fclose(arqDados);
     return 0;
 }
 
@@ -176,11 +162,11 @@ int getEmptyCluster(FILE *arqDados)
     }
     return END_OF_FILE;
 }
-// insere o cluster correspondente ao indice x em clus, retorna 1 caso ocorra algum erro
-int buscarCluster(BYTE x, Cluster *clus, FILE *arqDados)
+// insere o cluster de numero numCluster em clus, retorna 1 caso ocorra algum erro
+int buscarCluster(BYTE numCluster, Cluster *clus, FILE *arqDados)
 {
 
-    if ((fseek(arqDados, calcEndCluster(x), SEEK_SET)))
+    if ((fseek(arqDados, calcEndCluster(numCluster), SEEK_SET)))
     {
         return 1;
     }
@@ -209,46 +195,33 @@ BYTE getArq(DirectoryFile *dir, char nome[])
     }
     return END_OF_FILE;
 }
-// retorna o indice do metadado do arquivo/dir com o nome[] dentro de *dir, -1 para erro
-int getIndexMeta(DirectoryFile *dir, char nome[])
-{
-    int i;
 
-    for (i = 0; i < NUM_METAFILES; i++)
-    {
-        if (!strcmp(dir->metafiles[i].nome_file, nome))
-        {
-            return i;
-        }
-    }
-    return -1;
-}
 // retorna o endereco do byte do cluster de indice x(ex calcEndCluster(0) = 264)
 int calcEndCluster(BYTE x)
 {
     return (INI_ROOT + (CLUSTER_SIZE * x));
 }
 
-// aloca um cluster na memoria e escreve os metadados a serem inseridos no diretorio pai
+// aloca um cluster na memoria
 // nao altera o conteudo do cluster
 // retorna 1 caso ocorra algum erro
-int criaCluster(char nome[], char extensao[], MetaFiles *meta, FILE *arqDados)
+int criaCluster(char extensao[], FILE *arqDados, BYTE *index)
 {
-    BYTE index, tipocluster;
+    BYTE tipocluster;
 
-    index = getEmptyCluster(arqDados);
+    *index = getEmptyCluster(arqDados);
 
-    if (index == END_OF_FILE)
+    if (*index == END_OF_FILE)
     {
         return 1;
     }
 
-    if (mudaEstadoIndex(index, END_OF_FILE, arqDados))
+    if (mudaEstadoIndex(*index, END_OF_FILE, arqDados))
     {
         return 1;
     }
 
-    if ((fseek(arqDados, calcEndCluster(index), SEEK_SET)))
+    if ((fseek(arqDados, calcEndCluster(*index), SEEK_SET)))
     {
         return 1;
     }
@@ -266,14 +239,10 @@ int criaCluster(char nome[], char extensao[], MetaFiles *meta, FILE *arqDados)
     {
         return 1;
     }
-    // coloca a posicao da file no enesimo metafile
 
-    meta->cluster_inicial = index;
-    strcpy(meta->extensao, extensao);
-    strcpy(meta->nome_file, nome);
-    meta->valida = VALIDO;
     return 0;
 }
+// escreve os metadados a serem inseridos no diretorio pai
 
 // muda o valor do index para novoEstado(VAZIO,EOF,PONTEIRO), retorna 1 caso ocorra algum erro, senao retorna 0
 int mudaEstadoIndex(BYTE index, BYTE novoEstado, FILE *arqDados)
@@ -290,7 +259,7 @@ int mudaEstadoIndex(BYTE index, BYTE novoEstado, FILE *arqDados)
 
     return 0;
 }
-// pega o valor que está no indice index da tabela
+// pega o valor que está no indice "index" da tabela
 int getValorIndex(BYTE index, FILE *arqDados, BYTE *value)
 {
     if ((fseek(arqDados, (INI_INDICE + index), SEEK_SET)))
@@ -304,14 +273,29 @@ int getValorIndex(BYTE index, FILE *arqDados, BYTE *value)
     return 0;
 }
 
+// retorna o indice do metadado do arquivo/dir com o nome[] dentro de *dir, -1 para erro
+int getIndexMeta(DirectoryFile *dir, char nome[], char extensao[])
+{
+    int i;
+
+    for (i = 0; i < NUM_METAFILES; i++)
+    {
+        if ((!strcmp(dir->metafiles[i].nome_file, nome)) && (!strcmp(dir->metafiles[i].extensao, extensao)))
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
 // retorna o numero de metadados validos no diretorio, retorna 0 se for um arquivo txt,-1 caso ocorra algum erro
-int nrMetaFiles(FILE *arqDados, BYTE index)
+int nrMetaFiles(FILE *arqDados, BYTE numCluster)
 {
     int i, cont;
     Cluster *clus = (Cluster *)malloc(sizeof(Cluster));
     DirectoryFile *dir = (DirectoryFile *)malloc(sizeof(DirectoryFile));
 
-    if (buscarCluster(index, clus, arqDados))
+    if (buscarCluster(numCluster, clus, arqDados))
     {
         free(clus);
         free(dir);
@@ -337,3 +321,35 @@ int nrMetaFiles(FILE *arqDados, BYTE index)
     free(clus);
     return cont;
 }
+
+/*int getDirName(BYTE numCluster, char dirName[])
+{
+    FILE *arqDados;
+    Cluster *clus = (Cluster *)malloc(sizeof(Cluster));
+    DirectoryFile *dir = (DirectoryFile *)malloc(sizeof(DirectoryFile));
+
+    if ((arqDados = fopen("arqDados", "rb+")) == NULL)
+    {
+        free(clus);
+        free(dir);
+        printf("\n*** ERRO AO ABRIR ARQUIVO***\n");
+        return 1;
+    }
+
+    if (buscarCluster(numCluster, clus, arqDados))
+    {
+        fclose(arqDados);
+        free(clus);
+        free(dir);
+        return 1;
+    }
+    memcpy(dir, clus->conteudo, sizeof(DirectoryFile));
+
+    strcpy(dirName,dir->nomeDir);
+
+    fclose(arqDados);
+    free(clus);
+    free(dir);
+    return 0;
+
+}*/

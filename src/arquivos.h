@@ -83,8 +83,8 @@ void inicializaArquivo(FileSystem *arq);
 
 int writeBlockOfData(BYTE cluster, int offset, int sizeBlock, BYTE *data, FILE *arqDados);
 
-// seila se sequer precisa disso
-int getFirstCluster(Cluster *clus);
+// pega o cluster root
+int getFirstCluster(Cluster *clus, FILE *arqDados);
 
 // retorna o indice do 1 cluster vazio, EOF caso ocorra algum erro
 int getEmptyCluster(FILE *arqDados);
@@ -95,22 +95,22 @@ int buscarCluster(BYTE x, Cluster *clus, FILE *arqDados);
 // retorna o indice do arquivo/dir com o nome[] dentro de *dir, EOF para erro
 BYTE getArq(DirectoryFile *dir, char nome[]);
 
-// retorna o indice do metadado do arquivo/dir com o nome[] dentro de *dir, -1 para erro
-int getIndexMeta(DirectoryFile *dir, char nome[]);
-
 // retorna o endereco do byte do cluster de indice x(ex calcEndCluster(0) = 264)
 int calcEndCluster(BYTE x);
 
-// aloca um cluster na memoria e escreve os metadados a serem inseridos no diretorio pai
+// aloca um cluster na memoria
 // nao altera o conteudo do cluster
 // retorna 1 caso ocorra algum erro
-int criaCluster(char nome[], char extensao[], MetaFiles *meta, FILE *arqDados);
+int criaCluster(char extensao[], FILE *arqDados, BYTE *index);
 
 // muda o valor do index para novoEstado(VAZIO,EOF,PONTEIRO), retorna 0 caso ocorra algum erro, senao retorna 1
 int mudaEstadoIndex(BYTE index, BYTE novoEstado, FILE *arqDados);
 
 // pega o valor que está no indice index da tabela
 int getValorIndex(BYTE index, FILE *arqDados, BYTE *value);
+
+// retorna o indice do metadado do arquivo/dir com o nome[] dentro de *dir, -1 para erro
+int getIndexMeta(DirectoryFile *dir, char nome[], char extensao[]);
 
 // retorna o numero de metadados validos no diretorio, retorna 0 se for um arquivo txt,-1 caso ocorra algum erro
 int nrMetaFiles(FILE *arqDados, BYTE index);
