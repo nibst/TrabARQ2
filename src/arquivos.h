@@ -3,12 +3,14 @@
 ///
 ///             Alunos:
 ///                     (00326477)  Felipe Kaiser Schnitzler
-///                     (00323741)  Níkolas Padão
+///                     (00323741)  Níkolas Padão Schuster
 ///                     (00275960)  Pedro Afonso Tremea Serpa
-///                     (00xxxxxx)  Ricardo
+///                     (00xxxxxx)  Ricardo 
 
 #include <stdio.h>
 
+#define INI_INDICE 8 // oitavo byte
+#define INI_ROOT 264 // 256(indices) + 4x2(metadados de 2 bytes)
 #define NUM_INDICES 256
 #define NUM_CLUSTERS 256
 #define CLUSTER_SIZE 32768
@@ -82,9 +84,6 @@ int readFileSystem(FileSystem *arq);
 void inicializaArquivo(FileSystem *arq);
 
 int writeBlockOfData(BYTE cluster,int offset,int sizeBlock, BYTE *data,FILE *arqDados);
-
-//pega o cluster root
-int getFirstCluster(Cluster *clus,FILE *arqDados);
 
 //retorna o indice do 1 cluster vazio, EOF caso ocorra algum erro
 int getEmptyCluster(FILE *arqDados);

@@ -1,11 +1,11 @@
-///             Arquitetura e Organiza��o de Computadores II
+///             Arquitetura e Organização de Computadores II
 ///                   Trabalho 2: Light File System
 ///
 ///             Alunos:
 ///                     (00326477)  Felipe Kaiser Schnitzler
-///                     (00323741)  N�kolas Pad�o
+///                     (00323741)  Níkolas Padão Schuster
 ///                     (00275960)  Pedro Afonso Tremea Serpa
-///                     (00xxxxxx)  Ricardo
+///                     (00xxxxxx)  Ricardo 
 
 #include "commands.h"
 #include "arquivos.h"

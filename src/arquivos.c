@@ -1,20 +1,16 @@
-///             Arquitetura e Organiza��o de Computadores II
+///             Arquitetura e Organização de Computadores II
 ///                   Trabalho 2: Light File System
 ///
 ///             Alunos:
 ///                     (00326477)  Felipe Kaiser Schnitzler
-///                     (00323741)  N�kolas Pad�o
+///                     (00323741)  Níkolas Padão Schuster
 ///                     (00275960)  Pedro Afonso Tremea Serpa
-///                     (00xxxxxx)  Ricardo
+///                     (00xxxxxx)  Ricardo 
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "arquivos.h"
-
-#define INI_INDICE 8 // oitavo byte
-#define INI_ROOT 264 // 256(indices) + 4x2(metadados de 2 bytes)
-
 void inicializaMetadados(MetaDados *meta)
 {
     meta->tamanho_indice = NUM_INDICES;
@@ -119,27 +115,6 @@ int writeBlockOfData(BYTE cluster, int offset, int sizeBlock, BYTE *data, FILE *
         return 1;
     }
 
-    return 0;
-}
-
-// pega o primeiro cluster(root)
-int getFirstCluster(Cluster *clus, FILE *arqDados)
-{
-
-    if ((arqDados = fopen("arqDados", "rb")) == NULL)
-    {
-        return 1;
-    }
-    // se nao der certo fseek
-    if ((fseek(arqDados, INI_ROOT, SEEK_SET)))
-    {
-        return 1;
-    }
-    // coloca o primeiro cluster em clus
-    if (fread(clus, sizeof(Cluster), 1, arqDados) != 1)
-    {
-        return 1;
-    }
     return 0;
 }
 
