@@ -1,5 +1,0 @@
-obj/
-bin/
-TrabFinalArq2.layout
-TrabFinalArq2.depend
-arqDados
