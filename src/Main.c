@@ -5,7 +5,7 @@
 ///                     (00326477)  Felipe Kaiser Schnitzler
 ///                     (00323741)  N�kolas Pad�o
 ///                     (00275960)  Pedro Afonso Tremea Serpa
-///                     (00xxxxxx)  Ricardo
+///                     (00325735)  Ricardo Hermes Dalcin
 
 #include "commands.h"
 #include "arquivos.h"
@@ -25,11 +25,11 @@
 #define MAX_INSTRUCTION_SIZE 1000
 
 //s� os espa�os em branco da esquerda
-char* leftTrim(char *args)
+char *leftTrim(char *args)
 
 {
     int i = 0;
-    while(args[i]== ' ')
+    while (args[i] == ' ')
     {
         args++;
     }
@@ -38,15 +38,15 @@ char* leftTrim(char *args)
 //tira os espa�oes em branco da direita
 char *rightTrim(char *args)
 {
-    int i = strlen(args)-1;
-    while(args[i] == ' ')
+    int i = strlen(args) - 1;
+    while (args[i] == ' ')
     {
         args[i] = '\0';
         i--;
     }
     return args;
 }
-char* trim(char *args)
+char *trim(char *args)
 {
     args = leftTrim(args);
     return rightTrim(args);
@@ -56,23 +56,44 @@ int countArguments(char *args)
 {
     int i;
     int arg_count = 0;
-    //fazer algo pra considerar entre aspas
 
-    //sem considerar aspas:
-    i=0;
-    while(args[i]!= '\0')
+    char separador;
+
+    i = 0;
+    while (args[i] != '\0')
     {
-        //passa atraves dos argumentos
-        while((args[i]!= ' ') && (args[i]!= '\0'))
+        // passa através dos argumentos
+        while ((args[i] != ' ') && (args[i] != '"') && (args[i] != '\0'))
             i++;
-        //passa pelos espaços em branco entre argumentos
-        //não precisa testar '\0' pq args ja vai estar trimmed ent�o n�o existe
-        //como ter ' ' seguido de '\0'
-        while((args[i]) == ' ')
+
+        // atribui o separador encontrado
+        separador = args[i];
+
+        // se o separador for aspas, procura o fechamento
+        if (separador == '"')
+        {
+            // pula a primeira '"'
             i++;
-        //conta o primeiro arg
+
+            // procura a próxima aspa até acabar a string
+            while ((args[i] != separador) && (args[i] != '\0'))
+                i++;
+
+            // pula a última '"' (se tiver)
+            if (args[i] != '\0')
+                i++;
+        }
+
+        // passa pelos espaços em branco entre argumentos
+        // não precisa testar '\0' pq args ja vai estar trimmed entao nao existe
+        // como ter ' ' seguido de '\0'
+        while ((args[i]) == ' ')
+            i++;
+
+        // conta o argumento
         arg_count++;
     }
+
     return arg_count;
 }
 
@@ -89,15 +110,14 @@ Arguments get_command_and_args(char *instruction_line, Arguments instruction)
         //tira o \n, bota um null no lugar
         instruction.command_name[strlen(instruction.command_name) - 1] = '\0';
         //apontar instruction.args pra algum lugar pra nao bugar depois
-        instruction.args = instruction_line + strlen(instruction.command_name)+1;
+        instruction.args = instruction_line + strlen(instruction.command_name) + 1;
         //como não ha argumentos vou deixar como "" o argumento pra evitar bugs
-        strcpy(instruction.args,"");
-
+        strcpy(instruction.args, "");
     }
     else
     {
         //pega os argumentos, todos juntos tho, com o \n no final
-        instruction.args = instruction_line + strlen(instruction.command_name)+1;
+        instruction.args = instruction_line + strlen(instruction.command_name) + 1;
         //tirar o \n
         if (instruction.args[strlen(instruction.args) - 1] == '\n')
             //tira o \n, bota um null no lugar
@@ -112,41 +132,41 @@ Arguments get_command_and_args(char *instruction_line, Arguments instruction)
 
 void emulaCMD()
 {
-    char *dirName = (char *)malloc((sizeof(char) * strlen(ROOTNAME)) + 1);//para armazenar ROOTNAME
-    strcpy(dirName,ROOTNAME);
-    char *instruction_line = (char *)malloc((sizeof(char) * MAX_INSTRUCTION_SIZE) + 1) ;
-    int i=-1;
-    BYTE ok = 1;//se rodou o comando corretamente = 0,senao = 1
+    char *dirName = (char *)malloc((sizeof(char) * strlen(ROOTNAME)) + 1); //para armazenar ROOTNAME
+    strcpy(dirName, ROOTNAME);
+    char *instruction_line = (char *)malloc((sizeof(char) * MAX_INSTRUCTION_SIZE) + 1);
+    int i = -1;
+    BYTE ok = 1; //se rodou o comando corretamente = 0,senao = 1
     Arguments instruction;
     instruction.cluster_atual = 0x00;
     while (1)
-     {
+    {
 
-          if(ok == 0 && i == CD)
+        if (ok == 0 && i == CD)
         {
             free(dirName);
             dirName = (char *)malloc((sizeof(char) * strlen(instruction.args)) + 1);
-            strcpy(dirName,instruction.args);
+            strcpy(dirName, instruction.args);
         }
 
-        printf("%s",dirName);
+        printf("%s", dirName);
         printf(">");
         fgets(instruction_line, MAX_INSTRUCTION_SIZE, stdin);
         //se o primeiro caractere não for enter
         if (instruction_line[0] != 10)
         {
-           instruction = get_command_and_args(instruction_line,instruction);
+            instruction = get_command_and_args(instruction_line, instruction);
 
-           int p;   //Pra aceitar letra minuscula tbm.
-           for (p=0; instruction.command_name[p] != '\0'; p++)
-           {
-               instruction.command_name[p] = toupper(instruction.command_name[p]);
-           }
+            int p; //Pra aceitar letra minuscula tbm.
+            for (p = 0; instruction.command_name[p] != '\0'; p++)
+            {
+                instruction.command_name[p] = toupper(instruction.command_name[p]);
+            }
 
-            for(i =0; i<NCOMMANDS; i++)
+            for (i = 0; i < NCOMMANDS; i++)
             {
                 //se comando digitado tiver na lista de comandos la
-                if(!strcmp(commands[i].name,instruction.command_name))
+                if (!strcmp(commands[i].name, instruction.command_name))
                 {
                     instruction.owner = &commands[i];
                     //roda funcao daquele comando
@@ -158,8 +178,8 @@ void emulaCMD()
                 }
             }
             //nao achou comando
-            if(i==NCOMMANDS)
-                printf("INVALID COMMAND: '%s'\n",instruction.command_name);
+            if (i == NCOMMANDS)
+                printf("INVALID COMMAND: '%s'\n", instruction.command_name);
         }
     }
     free(instruction_line);

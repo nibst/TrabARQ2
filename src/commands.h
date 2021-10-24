@@ -5,7 +5,7 @@
 ///                     (00326477)  Felipe Kaiser Schnitzler
 ///                     (00323741)  N�kolas Pad�o
 ///                     (00275960)  Pedro Afonso Tremea Serpa
-///                     (00xxxxxx)  Ricardo
+///                     (00325735)  Ricardo Hermes Dalcin
 
 #define NCOMMANDS 9
 

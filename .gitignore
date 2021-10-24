@@ -19,3 +19,7 @@ CMakeLists.TXT
 TRABFINALarq2.layout
 ZERO_CHECK.vcxproj
 ZERO_CHECK.vcxproj.filters
+
+*.layout
+*.cbp
+*.depend
