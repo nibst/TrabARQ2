@@ -1,14 +1,15 @@
-///             Arquitetura e Organiza��o de Computadores II
+///             Arquitetura e Organização de Computadores II
 ///                   Trabalho 2: Light File System
 ///
 ///             Alunos:
 ///                     (00326477)  Felipe Kaiser Schnitzler
-///                     (00323741)  N�kolas Pad�o
+///                     (00323741)  Níkolas Padão Schuster
 ///                     (00275960)  Pedro Afonso Tremea Serpa
 ///                     (00xxxxxx)  Ricardo
 
-#include "commands.h"
-#include "arquivos.h"
+// error.h tem commands.h e arquivos.h
+#include "error.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,7 +30,6 @@ void getPathToFile(char *caminho_inteiro, char *arquivo)
 }
 // se o diretorio estiver cheio, criar um novo diretorio de mesmo nome em outro cluster
 // esse diretorio extende o anterior que estava cheio
-/*aq precisaria alterar o valor de tabela[index] para o index do novo cluster do diretorio, e alterar o novo index para FF*/
 int dir_full(char nome[], char extensao[], BYTE index, FILE *arqDados, Cluster *clus, DirectoryFile *dir)
 {
     char nomeDir[TAM_NOME_MAX];
@@ -44,6 +44,7 @@ int dir_full(char nome[], char extensao[], BYTE index, FILE *arqDados, Cluster *
     strcpy(dir->nomeDir, nomeDir);
     return 0;
 }
+
 // escreve os metadados a serem inseridos no diretorio pai
 void modifyMetaFiles(MetaFiles *meta, BYTE index, char nome[], char extensao[])
 {
@@ -83,7 +84,7 @@ int CD_function(Arguments *arguments)
     Cluster *clus = (Cluster *)malloc(sizeof(Cluster));
     DirectoryFile *dir = (DirectoryFile *)malloc(sizeof(DirectoryFile));
     char *dirName;
-    int i = 0;
+    int i;
     int j;
     int match = 1;
     char *path = (char *)malloc(sizeof(char) * (strlen(arguments->args)) + 1);
@@ -93,49 +94,34 @@ int CD_function(Arguments *arguments)
 
     if ((arqDados = fopen("arqDados", "rb+")) == NULL)
     {
-        printf("\n*** ERRO AO ABRIR ARQUIVO***\n\n");
-        free(clus);
-        free(dir);
         free(path);
-        fclose(arqDados);
-        return 1;
+        return errorOpeningFile(clus, dir, arqDados);
     }
     // checa se o numero de argumentos está de acordo
     if (arguments->num_args != arguments->owner->expected_args)
     {
-        printf("[ERROR] Expected %u arguments but got %u: '%s'\n\n", arguments->owner->expected_args, arguments->num_args, arguments->args);
-        free(clus);
-        free(dir);
         free(path);
-        fclose(arqDados);
-        return 1;
+        return errorNumArguments(arguments, clus, dir, arqDados);
     }
-    // pega o cluster do arqDados e coloca no clus
-    if (getFirstCluster(clus, arqDados) != 0)
-    {
-        printf("[ERROR] Error in getting the cluster\n\n");
-        free(clus);
-        free(dir);
-        free(path);
-        fclose(arqDados);
-        return 1;
-    }
-    // copia o conteudo para dir, assim da para interpretar ele como um directory table
-    memcpy(dir, clus->conteudo, sizeof(DirectoryFile));
-    dirName = strtok(path, "/");
 
+    dirName = strtok(path, "/");
     // se o primeiro argumento for diferente de root
     if ((strcmp("root", dirName)))
     {
-        printf("[ERROR] invalid path '%s'\n\n", arguments->args);
-        free(clus);
-        free(dir);
-        free(path);
-        fclose(arqDados);
-        return 1;
+        return errorInvalidPath(arguments, clus, dir, path, arqDados);
     }
+    i = 0;
     while (((dirName = strtok(NULL, "/")) != NULL) && (match == 1))
     {
+        // pega o cluster do arqDados e coloca no clus
+        if (buscarCluster(i, clus, arqDados) != 0)
+        {
+            free(path);
+            return errorGettingCluster(clus, dir, arqDados);
+        }
+        // copia o conteudo para dir, assim da para interpretar ele como um directory table
+        memcpy(dir, clus->conteudo, sizeof(DirectoryFile));
+
         j = 0;
         match = 0; // match é variavel para dizer se achou o dir procurado
         while (j < NUM_METAFILES && !match)
@@ -161,11 +147,7 @@ int CD_function(Arguments *arguments)
         {
             if (getValorIndex(clus->cluster_number, arqDados, &value))
             {
-                printf("[ERROR] Error in getting index value\n\n");
-                free(clus);
-                free(dir);
-                fclose(arqDados);
-                return 1;
+                return errorGettingIndexValue(clus, dir, arqDados);
             }
             // se acabar o cluster e não der match ve se está no cluster que este atual aponta
             if (value != END_OF_FILE && value != VAZIO)
@@ -173,24 +155,15 @@ int CD_function(Arguments *arguments)
                 // pega o cluster do arqDados e coloca no clus
                 if (buscarCluster(arguments->cluster_atual, clus, arqDados) != 0)
                 {
-                    printf("[ERROR] Error in getting the cluster\n\n");
-                    free(clus);
-                    free(dir);
                     free(path);
-                    fclose(arqDados);
-                    return 1;
+                    return errorGettingCluster(clus, dir, arqDados);
                 }
                 // copia o conteudo para dir, assim da para interpretar ele como um directory table
                 memcpy(dir, clus->conteudo, sizeof(DirectoryFile));
             }
             else
             {
-                printf("[ERROR] invalid path '%s'\n\n", arguments->args);
-                free(clus);
-                free(dir);
-                free(path);
-                fclose(arqDados);
-                return 1;
+                return errorInvalidPath(arguments, clus, dir, path, arqDados);
             }
         }
     }
@@ -214,37 +187,17 @@ int DIR_function(Arguments *arguments)
 
     if ((arqDados = fopen("arqDados", "rb+")) == NULL)
     {
-        printf("\n*** ERRO AO ABRIR ARQUIVO***\n\n");
-        free(clus);
-        free(dir);
-        fclose(arqDados);
-        return 1;
-    }
-    if (clus->cluster_type == 1) // se não for um cluster de pasta
-    {
-        printf("[ERROR] Not in a directory\n\n"); // Isso é mais pra marcar se vai dar algum bug, pq é pra sempre ta dentro de alguma pasta.
-        free(clus);
-        free(dir);
-        fclose(arqDados);
-        return 1;
+        return errorOpeningFile(clus, dir, arqDados);
     }
     // checa se o numero de argumentos está de acordo
     if (arguments->num_args != arguments->owner->expected_args)
     {
-        printf("[ERROR] Expected %u arguments but got %u: '%s'\n\n", arguments->owner->expected_args, arguments->num_args, arguments->args);
-        free(clus);
-        free(dir);
-        fclose(arqDados);
-        return 1;
+        return errorNumArguments(arguments, clus, dir, arqDados);
     }
     // pega o cluster do arqDados e coloca no clus
     if (buscarCluster(arguments->cluster_atual, clus, arqDados) != 0)
     {
-        printf("[ERROR] Error in getting the cluster\n\n");
-        free(clus);
-        free(dir);
-        fclose(arqDados);
-        return 1;
+        return errorGettingCluster(clus, dir, arqDados);
     }
     // copia o conteudo para dir, assim da para interpretar ele como um directory table
     memcpy(dir, clus->conteudo, sizeof(DirectoryFile));
@@ -252,20 +205,13 @@ int DIR_function(Arguments *arguments)
     // pega o valor da tabela[arguments->cluster_atual] e coloca em value
     if (getValorIndex(clus->cluster_number, arqDados, &value))
     {
-        printf("[ERROR] Error in getting index value\n\n");
-        free(clus);
-        free(dir);
-        fclose(arqDados);
-        return 1;
+        return errorGettingIndexValue(clus, dir, arqDados);
     }
 
     if ((aux = nrMetaFiles(arqDados, arguments->cluster_atual)) == -1)
     {
-        printf("[ERROR] Error in getting the cluster\n\n");
-        free(clus);
-        free(dir);
-        fclose(arqDados);
-        return 1;
+        // o nrMetaFiles tem a funcao buscaCluster dentro, aí eh esse error
+        return errorGettingCluster(clus, dir, arqDados);
     }
     // se for vazio printa <vazio>
     if (aux == 0)
@@ -289,11 +235,7 @@ int DIR_function(Arguments *arguments)
                 // pega o cluster do arqDados e coloca no clus
                 if (buscarCluster(arguments->cluster_atual, clus, arqDados) != 0)
                 {
-                    printf("[ERROR] Error in getting the cluster\n\n");
-                    free(clus);
-                    free(dir);
-                    fclose(arqDados);
-                    return 1;
+                    return errorGettingCluster(clus, dir, arqDados);
                 }
                 // copia o conteudo para dir, assim da para interpretar ele como um directory table
                 memcpy(dir, clus->conteudo, sizeof(DirectoryFile));
@@ -303,7 +245,6 @@ int DIR_function(Arguments *arguments)
         }
         printf("\n");
     }
-
     free(clus);
     free(dir);
     fclose(arqDados);
@@ -326,28 +267,16 @@ int MKFILE_function(Arguments *arguments)
 
     if ((arqDados = fopen("arqDados", "rb+")) == NULL)
     {
-        printf("[ERROR] Error opening file\n\n");
-        free(clus);
-        free(dir);
-        fclose(arqDados);
-        return 1;
+        return errorOpeningFile(clus, dir, arqDados);
     }
     if (arguments->num_args != arguments->owner->expected_args)
     {
-        printf("[ERROR] Expected %u arguments but got %u: '%s'\n\n", arguments->owner->expected_args, arguments->num_args, arguments->args);
-        free(clus);
-        free(dir);
-        fclose(arqDados);
-        return 1;
+        return errorNumArguments(arguments, clus, dir, arqDados);
     }
     // pega o cluster do arqDados e coloca no clus
     if (buscarCluster(arguments->cluster_atual, clus, arqDados) != 0)
     {
-        printf("[ERROR] Error in getting the cluster\n\n");
-        free(clus);
-        free(dir);
-        fclose(arqDados);
-        return 1;
+        return errorGettingCluster(clus, dir, arqDados);
     }
     // copia o conteudo para dir, assim da para interpretar ele como um directory table
     memcpy(dir, clus->conteudo, sizeof(DirectoryFile));
@@ -375,22 +304,14 @@ int MKFILE_function(Arguments *arguments)
     // vai ser o cluster onde o arquivo criado vai estar
     if (criaCluster(extensao, arqDados, &index) != 0)
     {
-        printf("[ERROR] Make file error\n\n");
-        free(clus);
-        free(dir);
-        fclose(arqDados);
-        return 1;
+        return errorAllocatingCluster(clus, dir, arqDados);
     }
     else
     {
         // pega o valor da tabela[clus->cluster_number] e coloca em value
         if ((getValorIndex(clus->cluster_number, arqDados, &value)))
         {
-            printf("[ERROR] Error in getting index value\n\n");
-            free(clus);
-            free(dir);
-            fclose(arqDados);
-            return 1;
+            return errorGettingIndexValue(clus, dir, arqDados);
         }
         // tratar se diretorio estiver cheio
         if (metafile_n == NUM_METAFILES && value == END_OF_FILE)
@@ -398,11 +319,7 @@ int MKFILE_function(Arguments *arguments)
             // função que faz o tratamento do diretorio estar cheio->aloca um novo cluster para extender o atual
             if (dir_full(nome, extensao, index, arqDados, clus, dir))
             {
-                printf("[ERROR] Error creating new cluster\n\n");
-                free(clus);
-                free(dir);
-                fclose(arqDados);
-                return 1;
+                return errorAllocatingCluster(clus, dir, arqDados);
             }
             // reseta i para 0 para escrever na memória corretamente mais abaixo
             //"memcpy(buffer, &(dir->metafiles[i]), sizeof(MetaFiles));"
@@ -411,13 +328,17 @@ int MKFILE_function(Arguments *arguments)
         // modifica metafile->escreve o nome,extensao e deixe como file valida
         modifyMetaFiles(&(dir->metafiles[i]), index, nome, extensao);
     }
+
     buffer = makeByteBuffer(sizeof(MetaFiles));
     memcpy(buffer, &(dir->metafiles[i]), sizeof(MetaFiles));
     offset = 1 + TAM_NOME_MAX + TAM_EXTENSAO + (metafile_n * (sizeof(MetaFiles)));
     // escreve mudanças
-    writeBlockOfData(arguments->cluster_atual, offset, sizeof(MetaFiles), buffer, arqDados);
+    if (writeBlockOfData(arguments->cluster_atual, offset, sizeof(MetaFiles), buffer, arqDados))
+    {
+        free(buffer);
+        return errorWritingData(clus, dir, arqDados);
+    }
     free(buffer);
-
     printf("File '%s.%s' created\n\n", nome, extensao);
     free(clus);
     free(dir);
@@ -554,7 +475,7 @@ int RM_function(Arguments *arguments)
         return 1;
     }
 
-    if (flag)
+    if (flag) // aq dentro q precisa alterar o cluster atual
     {
         (arguments->args) = "root"; // caso seja apagado o cluster atual, retorna para o pai
         CD_function(arguments);
@@ -569,7 +490,8 @@ int RM_function(Arguments *arguments)
 }
 //---------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------
-// TODO: ARRUMAR INICIALIZACAO DOS METAFILES----------------------------------------------
+//---------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 int MKDIR_function(Arguments *arguments)
 {
     FILE *arqDados;
@@ -680,6 +602,164 @@ int MKDIR_function(Arguments *arguments)
     return 0;
 }
 
+int EDIT_function(Arguments *arguments)
+{
+    FILE *arqDados;
+    Cluster *clus = (Cluster *)malloc(sizeof(Cluster));
+    DirectoryFile *dir = (DirectoryFile *)malloc(sizeof(DirectoryFile));
+    char nome[TAM_NOME_MAX];
+    char extensao[TAM_EXTENSAO] = "bin"; // caso usuario nao de extensao
+    char arquivo[TAM_NOME_MAX + TAM_EXTENSAO + 1];
+    char *teste;
+
+    char *caminho_arquivo = (char *)malloc(sizeof(char) * strlen(arguments->args) + 1);
+    char *conteudo_arquivo = (char *)malloc(sizeof(char) * strlen(arguments->args) + 1);
+
+    char *token = strtok(arguments->args, " \"");
+
+    int offset;
+
+    BYTE index, i = 0, estado;
+
+    if (arguments->num_args != arguments->owner->expected_args)
+    {
+        printf("[ERROR] Expected %u arguments but got %u: '%s'\n\n", arguments->owner->expected_args, arguments->num_args, arguments->args);
+        free(clus);
+        free(dir);
+        free(caminho_arquivo);
+        free(conteudo_arquivo);
+        return 1;
+    }
+
+    strcpy(caminho_arquivo, token);
+
+    // pega o segundo token depois de aspas (conteudo do arquivo)
+    token = strtok(NULL, "\"");
+
+    if (token == NULL)
+    {
+        printf("[ERROR] Argument provided for file content is malformed\n\n");
+        free(clus);
+        free(dir);
+        free(caminho_arquivo);
+        free(conteudo_arquivo);
+        return 1;
+    }
+
+    // copia token para conteudo do arquivo
+    strcpy(conteudo_arquivo, token);
+
+    // altera os argumentos para poder chamar a CD
+    strcpy(arguments->args, caminho_arquivo);
+
+    // separa o caminho em path e arquivo
+    getPathToFile(arguments->args, arquivo);
+
+    // faz CD na pasta onde está o arquivo para editar
+    if (CD_function(arguments))
+    {
+        free(clus);
+        free(dir);
+        free(caminho_arquivo);
+        free(conteudo_arquivo);
+        return 1;
+    }
+
+    if ((arqDados = fopen("arqDados", "rb+")) == NULL)
+    {
+        printf("[ERROR] Error opening file\n\n");
+        free(clus);
+        free(dir);
+        free(caminho_arquivo);
+        free(conteudo_arquivo);
+        fclose(arqDados);
+        return 1;
+    }
+
+    // pega o cluster do arqDados e coloca no clus
+    if (buscarCluster(arguments->cluster_atual, clus, arqDados) != 0)
+    {
+        printf("[ERROR] Error in getting the cluster\n\n");
+        free(clus);
+        free(dir);
+        free(caminho_arquivo);
+        free(conteudo_arquivo);
+        fclose(arqDados);
+        return 1;
+    }
+
+    memcpy(dir, clus->conteudo, sizeof(DirectoryFile));
+
+    // separa nome da extensao
+    strcpy(nome, strtok(arquivo, ". \n"));
+
+    // testa se o usuario colocou sequer uma extensao
+    if ((teste = strtok(NULL, ". \n")) != NULL)
+        strcpy(extensao, teste);
+
+    index = getIndexMeta(dir, nome, extensao);
+
+    if ((validMetafile(dir->metafiles[index])))
+    {
+        // apontar o i pro proximo cluster que tem a proxima directory table
+        i = dir->metafiles[index].cluster_inicial;
+    }
+    else
+    {
+        printf("[ERROR] File '%s' does not exist\n\n", caminho_arquivo);
+        free(clus);
+        free(dir);
+        free(caminho_arquivo);
+        free(conteudo_arquivo);
+        fclose(arqDados);
+        return 1;
+    }
+
+    if (buscarCluster(i, clus, arqDados) != 0)
+    {
+        printf("[ERROR] Error in getting the cluster\n\n");
+        free(clus);
+        free(dir);
+        free(caminho_arquivo);
+        free(conteudo_arquivo);
+        fclose(arqDados);
+        return 1;
+    }
+
+    if (clus->cluster_type == CLUSTER_TYPE_DIRECTORY_TABLE) // testa se eh diretorio
+    {
+        printf("[ERROR] Cannot edit a directory\n\n");
+        free(clus);
+        free(dir);
+        free(caminho_arquivo);
+        free(conteudo_arquivo);
+        fclose(arqDados);
+        return 1;
+    }
+
+    // memcpy(clus->conteudo, conteudo_arquivo, sizeof(char) * (strlen(conteudo_arquivo)) + 1);
+
+    offset = 1;
+    if (writeBlockOfData(i, offset, sizeof(char) * (strlen(conteudo_arquivo)) + 1, (BYTE *)conteudo_arquivo, arqDados))
+    {
+        printf("[ERROR] There was an error editing file\n\n");
+        free(clus);
+        free(dir);
+        free(caminho_arquivo);
+        free(conteudo_arquivo);
+        fclose(arqDados);
+        return 1;
+    }
+
+    printf("File %s edited\n\n", caminho_arquivo);
+    free(clus);
+    free(dir);
+    free(caminho_arquivo);
+    free(conteudo_arquivo);
+    fclose(arqDados);
+    return 0;
+}
+
 int EXIT_function(Arguments *arguments)
 {
     printf("\n Desligando... \n");
@@ -709,11 +789,9 @@ Command commands[NCOMMANDS] =
         {.name = "MKFILE",
          .expected_args = 1u,
          .func = &MKFILE_function},
-        {
-            .name = "EDIT",
-            .expected_args = 2u,
-            //.func = &EDIT_function
-        },
+        {.name = "EDIT",
+         .expected_args = 2u,
+         .func = &EDIT_function},
         {
             .name = "MOVE",
             .expected_args = 2u,

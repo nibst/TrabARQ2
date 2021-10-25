@@ -1,0 +1,6 @@
+//RM
+Funcao RM não considera se arquivo esta em mais de um cluster-> se tiver em mais de um cluster esses clusters tem que apontar pra 0 na tabela //felipe: resolvi, mas n cheguei a testar...
+Se remover o dir que tu está agora, digamos CD root/sla, aí RM root/sla. Na nossa interface vai ficar dizendo que estamos no root/sla ainda, mas ele n existe
+
+//BUG 
+Tratar caso nome de file ou diretorio for maior que o nome maximo estabelecido por nós, no momento o programa só crasha
