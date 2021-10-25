@@ -5,7 +5,7 @@
 ///                     (00326477)  Felipe Kaiser Schnitzler
 ///                     (00323741)  Níkolas Padão Schuster
 ///                     (00275960)  Pedro Afonso Tremea Serpa
-///                     (00xxxxxx)  Ricardo 
+///                     (00xxxxxx)  Ricardo
 
 #include "commands.h"
 #include "arquivos.h"
@@ -56,23 +56,44 @@ int countArguments(char *args)
 {
     int i;
     int arg_count = 0;
-    //fazer algo pra considerar entre aspas
 
-    //sem considerar aspas:
-    i=0;
-    while(args[i]!= '\0')
+    char separador;
+
+    i = 0;
+    while (args[i] != '\0')
     {
-        //passa atraves dos argumentos
-        while((args[i]!= ' ') && (args[i]!= '\0'))
+        // passa através dos argumentos
+        while ((args[i] != ' ') && (args[i] != '"') && (args[i] != '\0'))
             i++;
-        //passa pelos espaços em branco entre argumentos
-        //não precisa testar '\0' pq args ja vai estar trimmed ent�o n�o existe
-        //como ter ' ' seguido de '\0'
-        while((args[i]) == ' ')
+
+        // atribui o separador encontrado
+        separador = args[i];
+
+        // se o separador for aspas, procura o fechamento
+        if (separador == '"')
+        {
+            // pula a primeira '"'
             i++;
-        //conta o primeiro arg
+
+            // procura a próxima aspa até acabar a string
+            while ((args[i] != separador) && (args[i] != '\0'))
+                i++;
+
+            // pula a última '"' (se tiver)
+            if (args[i] != '\0')
+                i++;
+        }
+
+        // passa pelos espaços em branco entre argumentos
+        // não precisa testar '\0' pq args ja vai estar trimmed entao nao existe
+        // como ter ' ' seguido de '\0'
+        while ((args[i]) == ' ')
+            i++;
+
+        // conta o argumento
         arg_count++;
     }
+
     return arg_count;
 }
 

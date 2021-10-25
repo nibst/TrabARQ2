@@ -5,7 +5,7 @@
 ///                     (00326477)  Felipe Kaiser Schnitzler
 ///                     (00323741)  Níkolas Padão Schuster
 ///                     (00275960)  Pedro Afonso Tremea Serpa
-///                     (00xxxxxx)  Ricardo 
+///                     (00xxxxxx)  Ricardo
 
 #include <stdio.h>
 #include <stdlib.h>
