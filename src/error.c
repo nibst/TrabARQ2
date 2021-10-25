@@ -5,7 +5,7 @@
 ///                     (00326477)  Felipe Kaiser Schnitzler
 ///                     (00323741)  Níkolas Padão Schuster
 ///                     (00275960)  Pedro Afonso Tremea Serpa
-///                     (00xxxxxx)  Ricardo 
+///                     (00xxxxxx)  Ricardo
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,12 +22,11 @@ int errorOpeningFile(Cluster *clus, DirectoryFile *dir, FILE *arqDados)
     return 1;
 }
 // mensagem de error, da free em clus e dir, fclose em arqDados e retorna 1
-int errorNumArguments(Arguments *arguments, Cluster *clus, DirectoryFile *dir, FILE *arqDados)
+int errorNumArguments(Arguments *arguments, Cluster *clus, DirectoryFile *dir)
 {
     printf("[ERROR] Expected %u arguments but got %u: '%s'\n\n", arguments->owner->expected_args, arguments->num_args, arguments->args);
     free(clus);
     free(dir);
-    fclose(arqDados);
     return 1;
 }
 // mensagem de error, da free em clus e dir, fclose em arqDados e retorna 1

@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "arquivos.h"
+#define MAX_INSTRUCTION_SIZE 1000
 void inicializaMetadados(MetaDados *meta)
 {
     meta->tamanho_indice = NUM_INDICES;
@@ -21,11 +22,12 @@ void inicializaMetadados(MetaDados *meta)
 void inicializaIndex(BYTE *ind)
 {
     int i;
-    ind[0] = END_OF_FILE; // inicia o root como eof
-    for (i = 1; i < NUM_INDICES; i++)
+    ind[0] = END_OF_FILE; // inicia o root como eof, pra indicar que tem conteudo dentro
+    for (i = 1; i < NUM_INDICES - 1; i++)
     {
         ind[i] = VAZIO; // inicia o resto como vazio
     }
+    ind[i] = END_OF_FILE; // ultimo cluster é especifico pra indicar end of file, nao pode ser usado
 }
 
 void inicializaClusters(Cluster *clus)
@@ -43,12 +45,14 @@ void inicializaClusters(Cluster *clus)
 
     clus[0].cluster_type = CLUSTER_TYPE_DIRECTORY_TABLE;
     clus[0].cluster_number = 0;
+    clus[0].cluster_pai = 0;
 
     memcpy(clus[0].conteudo, root, sizeof(DirectoryFile));
 
     for (i = 1; i < NUM_CLUSTERS; i++)
     {
         clus[i].cluster_number = i;
+        clus[i].cluster_pai = i;
         for (j = 1; j < CLUSTER_SIZE - 3; j++)
             clus[i].conteudo[j] = (i % 26) + 65; //!!so para vizualizar lugares "sem nada", depois tirar isso!!
     }
@@ -217,7 +221,7 @@ int criaCluster(char extensao[], FILE *arqDados, BYTE *index)
 
     return 0;
 }
-//escreve os metadados a serem inseridos no diretorio pai
+// escreve os metadados a serem inseridos no diretorio pai
 
 // muda o valor do index para novoEstado(VAZIO,EOF,PONTEIRO), retorna 1 caso ocorra algum erro, senao retorna 0
 int mudaEstadoIndex(BYTE index, BYTE novoEstado, FILE *arqDados)
@@ -249,13 +253,13 @@ int getValorIndex(BYTE index, FILE *arqDados, BYTE *value)
 }
 
 // retorna o indice do metadado do arquivo/dir com o nome[] dentro de *dir, -1 para erro
-int getIndexMeta(DirectoryFile *dir, char nome[])
+int getIndexMeta(DirectoryFile *dir, char nome[], char extensao[])
 {
     int i;
 
     for (i = 0; i < NUM_METAFILES; i++)
     {
-        if (!strcmp(dir->metafiles[i].nome_file, nome))
+        if ((!strcmp(dir->metafiles[i].nome_file, nome)) && (!strcmp(dir->metafiles[i].extensao, extensao)))
         {
             return i;
         }
@@ -297,34 +301,91 @@ int nrMetaFiles(FILE *arqDados, BYTE numCluster)
     return cont;
 }
 
-/*int getDirName(BYTE numCluster, char dirName[])
+int getDirName(BYTE numCluster, char dirName[], Cluster *clus, FILE *arqDados)
 {
-    FILE *arqDados;
-    Cluster *clus = (Cluster *)malloc(sizeof(Cluster));
     DirectoryFile *dir = (DirectoryFile *)malloc(sizeof(DirectoryFile));
-
-    if ((arqDados = fopen("arqDados", "rb+")) == NULL)
-    {
-        free(clus);
-        free(dir);
-        printf("\n*** ERRO AO ABRIR ARQUIVO***\n");
-        return 1;
-    }
-
     if (buscarCluster(numCluster, clus, arqDados))
     {
         fclose(arqDados);
-        free(clus);
+
         free(dir);
         return 1;
     }
     memcpy(dir, clus->conteudo, sizeof(DirectoryFile));
 
-    strcpy(dirName,dir->nomeDir);
+    strcpy(dirName, dir->nomeDir);
 
+    fclose(arqDados);
+    free(dir);
+    return 0;
+}
+int getPathFromClusToRoot(BYTE numCluster, char *path)
+{
+    FILE *arqDados;
+    Cluster *clus = (Cluster *)malloc(sizeof(Cluster));
+    DirectoryFile *dir = (DirectoryFile *)malloc(sizeof(DirectoryFile));
+    char *path_aux = (char *)malloc(sizeof(char) * MAX_INSTRUCTION_SIZE);
+    int i;
+    if ((arqDados = fopen("arqDados", "rb+")) == NULL)
+    {
+        free(dir);
+        free(clus);
+        free(path_aux);
+        return 1;
+    }
+    //enquanto cluster nao for root
+    strcpy(path_aux,"");
+    while (numCluster != 0)
+    {
+        if (buscarCluster(numCluster, clus, arqDados))
+        {
+            fclose(arqDados);
+            free(clus);
+            free(dir);
+            free(path_aux);
+            return 1;
+        }
+        memcpy(dir, clus->conteudo, sizeof(DirectoryFile));
+
+        strcpy(path, dir->nomeDir);
+
+        strcat(path_aux, path);
+        strcat(path_aux, "/");
+        numCluster = clus->cluster_pai;
+    }
+    if (buscarCluster(numCluster, clus, arqDados))
+    {
+        fclose(arqDados);
+        free(clus);
+        free(dir);
+        free(path_aux);
+        return 1;
+    }
+    memcpy(dir, clus->conteudo, sizeof(DirectoryFile));
+
+    strcpy(path, dir->nomeDir);
+    strcat(path_aux, path);
+
+    int tam = strlen(path_aux);
+    strcpy(path,"");
+    i = tam- 1;
+    while(i>=0)
+    {
+        while ((path_aux[i] != '/') && i >= 0)
+            i--;
+        if(i>=0)
+        {
+            path_aux[i] = '\0';
+            strcat(path, path_aux + i + 1);
+            strcat(path,"/");
+        }
+        else
+            strcat(path, path_aux);
+    }
     fclose(arqDados);
     free(clus);
     free(dir);
+    free(path_aux);
     return 0;
+}
 
-}*/

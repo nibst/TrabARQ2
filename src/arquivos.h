@@ -5,7 +5,7 @@
 ///                     (00326477)  Felipe Kaiser Schnitzler
 ///                     (00323741)  Níkolas Padão Schuster
 ///                     (00275960)  Pedro Afonso Tremea Serpa
-///                     (00xxxxxx)  Ricardo 
+///                     (00xxxxxx)  Ricardo
 
 #include <stdio.h>
 
@@ -57,8 +57,10 @@ typedef struct Type_DirectoryFile
 typedef struct Type_Cluster
 {
     BYTE cluster_type;//como vai ser interpretado os dados a seguir
-    BYTE conteudo[CLUSTER_SIZE - (2 * sizeof(BYTE))];
+    BYTE conteudo[CLUSTER_SIZE - (3 * sizeof(BYTE))];
+    BYTE cluster_pai; //se igual a END_OF_FILE quer dizer q esse cluster n tem pai
     BYTE cluster_number;//cluster em que está->vai checar a tabela de indices e apontar pro proximo cluster
+
 
 }Cluster;
 
@@ -109,7 +111,13 @@ int mudaEstadoIndex(BYTE index, BYTE novoEstado, FILE *arqDados);
 int getValorIndex(BYTE index, FILE *arqDados, BYTE *value);
 
 // retorna o indice do metadado do arquivo/dir com o nome[] dentro de *dir, -1 para erro
-int getIndexMeta(DirectoryFile *dir, char nome[]);
+int getIndexMeta(DirectoryFile *dir, char nome[], char extensao[]);
 
 // retorna o numero de metadados validos no diretorio, retorna 0 se for um arquivo txt,-1 caso ocorra algum erro
 int nrMetaFiles(FILE *arqDados, BYTE index);
+
+//pega o nome do diretorio do cluster numCluster
+int getDirName(BYTE numCluster, char dirName[],Cluster *clus,FILE *arqDados);
+
+// pega o caminho do cluster numCluster até root separando por barras
+int getPathFromClusToRoot(BYTE numCluster, char *path);

@@ -133,8 +133,8 @@ Arguments get_command_and_args(char *instruction_line, Arguments instruction)
 
 void emulaCMD()
 {
-    char *dirName = (char *)malloc((sizeof(char) * strlen(ROOTNAME)) + 1);//para armazenar ROOTNAME
-    strcpy(dirName,ROOTNAME);
+    char *path = (char *)malloc((sizeof(char) * strlen(ROOTNAME)) + 1);//para armazenar ROOTNAME
+    strcpy(path,ROOTNAME);
     char *instruction_line = (char *)malloc((sizeof(char) * MAX_INSTRUCTION_SIZE) + 1) ;
     int i=-1;
     BYTE ok = 1;//se rodou o comando corretamente = 0,senao = 1
@@ -143,14 +143,14 @@ void emulaCMD()
     while (1)
      {
 
-          if(ok == 0 && i == CD)
+          if(ok == 0 && (i == CD || i == RM || i == RENAME))
         {
-            free(dirName);
-            dirName = (char *)malloc((sizeof(char) * strlen(instruction.args)) + 1);
-            strcpy(dirName,instruction.args);
+            free(path);
+            path = (char *)malloc(sizeof(char) * MAX_INSTRUCTION_SIZE);
+            getPathFromClusToRoot(instruction.cluster_atual,path);
         }
 
-        printf("%s",dirName);
+        printf("%s",path);
         printf(">");
         fgets(instruction_line, MAX_INSTRUCTION_SIZE, stdin);
         //se o primeiro caractere não for enter
@@ -183,6 +183,7 @@ void emulaCMD()
                 printf("INVALID COMMAND: '%s'\n",instruction.command_name);
         }
     }
+    free(path);
     free(instruction_line);
 }
 

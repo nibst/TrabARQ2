@@ -6,7 +6,7 @@
 ///                     (00326477)  Felipe Kaiser Schnitzler
 ///                     (00323741)  Níkolas Padão Schuster
 ///                     (00275960)  Pedro Afonso Tremea Serpa
-///                     (00xxxxxx)  Ricardo 
+///                     (00xxxxxx)  Ricardo
 
 #include "commands.h"
 #include "arquivos.h"
@@ -15,7 +15,7 @@
 int errorOpeningFile(Cluster *clus, DirectoryFile *dir, FILE *arqDados);
 
 // mensagem de error, da free em clus e dir, fclose em arqDados e retorna 1
-int errorNumArguments(Arguments *arguments, Cluster *clus, DirectoryFile *dir, FILE *arqDados);
+int errorNumArguments(Arguments *arguments, Cluster *clus, DirectoryFile *dir);
 
 // mensagem de error, da free em clus e dir, fclose em arqDados e retorna 1
 int errorGettingCluster(Cluster *clus, DirectoryFile *dir, FILE *arqDados);

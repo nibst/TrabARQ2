@@ -1,8 +1,5 @@
-//RM
-Funcao RM não considera se arquivo esta em mais de um cluster-> se tiver em mais de um cluster esses clusters tem que apontar pra 0 na tabela
-Se remover o dir que tu está agora, digamos CD root/sla, aí RM root/sla. Na nossa interface vai ficar dizendo que estamos no root/sla ainda, mas ele n existe
-Funcao RM nao diferencia de diretorio de .txt, entao se tiver dir com nome algo e texto com nome algo vai dar algo estranho
-(FELIPE JA RESOLVEU ACHO, MAS N BOTEI NESSA MINHA VERSAO DA BRANCH)
-
 //BUG 
 Tratar caso nome de file ou diretorio for maior que o nome maximo estabelecido por nós, no momento o programa só crasha
+
+//se der tempo
+Usar o que esta em metadados inves das nossas constantes
