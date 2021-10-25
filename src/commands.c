@@ -361,6 +361,13 @@ int RM_function(Arguments *arguments)
     BYTE index, i = 0, estado, j;
     int flag;
 
+    // checa se o numero de argumentos está de acordo
+    if (arguments->num_args != arguments->owner->expected_args)
+    {
+        free(arg_copy);
+        return errorNumArguments(arguments, clus, dir, arqDados);
+    }
+
     // copia para poder dar mensagem com o caminho completo depois
     strcpy(arg_copy, arguments->args);
     // separa o argumento em dois, o caminho até oq queremos remover e o arquivo que queremos remover
@@ -499,7 +506,7 @@ int MKDIR_function(Arguments *arguments)
     DirectoryFile *dir = (DirectoryFile *)malloc(sizeof(DirectoryFile));
     char nome[TAM_NOME_MAX];
     char extensao[TAM_EXTENSAO] = "dir";
-    int i, metafile_n, offset, j;
+    int i, metafile_n, offset, j = 0;
     BYTE *buffer, estado;
     BYTE index, value;
 
@@ -760,6 +767,148 @@ int EDIT_function(Arguments *arguments)
     return 0;
 }
 
+int RENAME_function(Arguments *arguments)
+{
+    FILE *arqDados;
+    Cluster *clus = (Cluster *)malloc(sizeof(Cluster));
+    DirectoryFile *dir = (DirectoryFile *)malloc(sizeof(DirectoryFile));
+    MetaFiles *meta = (MetaFiles *)malloc(sizeof(MetaFiles));
+    char nome[TAM_NOME_MAX];
+    char extensao[TAM_EXTENSAO] = "dir"; // caso usuario nao de extensao
+    char arquivo[TAM_NOME_MAX + TAM_EXTENSAO + 1];
+    char *teste;
+    BYTE index;
+    int offset, i = 0;
+    char *arg_copy = (char *)malloc(sizeof(char) * strlen(arguments->args) + 1);
+    char *caminho_arquivo = (char *)malloc(sizeof(char) * strlen(arguments->args) + 1);
+    char *novo_nome_arquivo = (char *)malloc(sizeof(char) * strlen(arguments->args) + 1);
+
+    // checa se o numero de argumentos está de acordo
+    if (arguments->num_args != arguments->owner->expected_args)
+    {
+        free(teste);
+        free(caminho_arquivo);
+        return errorNumArguments(arguments, clus, dir, arqDados);
+    }
+    strcpy(arg_copy, arguments->args);
+    caminho_arquivo = strtok(arguments->args, " ");
+    novo_nome_arquivo = strtok(NULL, "\0");
+    // faz o trim do novo nome
+    while (novo_nome_arquivo[i] == ' ')
+    {
+        novo_nome_arquivo++;
+    }
+    i = strlen(novo_nome_arquivo) - 1;
+    while (novo_nome_arquivo[i] == ' ')
+    {
+        novo_nome_arquivo[i] = '\0';
+        i--;
+    }
+
+    // separa o argumento em dois, o caminho até oq queremos remover e o arquivo que queremos mudar
+    getPathToFile(caminho_arquivo, arquivo);
+    strcpy(arguments->args, caminho_arquivo);
+    if (CD_function(arguments))
+    {
+        free(clus);
+        free(dir);
+        free(arg_copy);
+        free(teste);
+        free(caminho_arquivo);
+        return 1;
+    }
+
+    if ((arqDados = fopen("arqDados", "rb+")) == NULL)
+    {
+        free(teste);
+        free(caminho_arquivo);
+        free(arg_copy);
+        return errorOpeningFile(clus, dir, arqDados);
+    }
+
+    if (buscarCluster(arguments->cluster_atual, clus, arqDados) != 0)
+    {
+        free(teste);
+        free(caminho_arquivo);
+        free(arg_copy);
+        return errorGettingCluster(clus, dir, arqDados);
+    }
+    memcpy(dir, clus->conteudo, sizeof(DirectoryFile));
+
+    // separa nome da extensao
+    strcpy(nome, strtok(arquivo, ". \n"));
+    // testa se o usuario colocou sequer uma extensao
+    if ((teste = strtok(NULL, ". \n")) != NULL)
+        strcpy(extensao, teste);
+
+    index = getIndexMeta(dir, nome, extensao);
+
+    offset = 1 + TAM_NOME_MAX + TAM_EXTENSAO + (index * (sizeof(MetaFiles)) + 1); // coloca o offset no inicio do nome
+
+    if (strcmp(extensao, "dir") == 0) // caso seja alterado o nome de um diretorio
+    {
+        if (buscarCluster(dir->metafiles[index].cluster_inicial, clus, arqDados) != 0) // carrega o cluster do diretorio
+        {
+            free(teste);
+            free(caminho_arquivo);
+            free(arg_copy);
+            return errorGettingCluster(clus, dir, arqDados);
+        }
+        if (clus->cluster_type != CLUSTER_TYPE_DIRECTORY_TABLE) // caso o cluster lido nao seja um diretorio, foi lido o arq errado
+        {
+            free(teste);
+            free(caminho_arquivo);
+            free(arg_copy);
+            return errorGettingCluster(clus, dir, arqDados);
+        }
+        if (writeBlockOfData(arguments->cluster_atual, offset, strlen(novo_nome_arquivo) + 1, novo_nome_arquivo, arqDados)) // escreve o novo nome nos metafiles do dir pai
+        {
+            free(teste);
+            free(caminho_arquivo);
+            free(arg_copy);
+            return errorWritingData(clus, dir, arqDados);
+        }
+
+        offset = 1; // coloca o offset no inicio do nome
+
+        if (writeBlockOfData(clus->cluster_number, offset, strlen(novo_nome_arquivo) + 1, novo_nome_arquivo, arqDados)) // altera o nome do diretorio dentro do seu cluster
+        {
+            free(teste);
+            free(caminho_arquivo);
+            free(arg_copy);
+            return errorWritingData(clus, dir, arqDados);
+        }
+    }
+    else // caso seja alterado um arq de texto
+    {
+        novo_nome_arquivo = strtok(novo_nome_arquivo, "."); // coloca um \0 no final do nome
+        teste = strtok(NULL, "\0");
+        if (strcmp(teste, "txt")) // garante que a extensao digitada eh suportada
+        {
+            free(teste);
+            free(caminho_arquivo);
+            free(arg_copy);
+            return errorFileDoesNotExist(arg_copy, clus, dir, arqDados);
+        }
+        if (writeBlockOfData(arguments->cluster_atual, offset, strlen(novo_nome_arquivo) + 1, novo_nome_arquivo, arqDados)) // escreve o novo nome nos metafiles do dir pai
+        {
+            free(teste);
+            free(arg_copy);
+            free(caminho_arquivo);
+            return errorWritingData(clus, dir, arqDados);
+        }
+    }
+
+    free(clus);
+    free(dir);
+    fclose(arqDados);
+    free(arg_copy);
+    free(teste);
+    free(caminho_arquivo);
+    printf("File/Directory %s/%s renamed to %s\n\n", caminho_arquivo, arquivo, novo_nome_arquivo);
+    return 0;
+}
+
 int EXIT_function(Arguments *arguments)
 {
     printf("\n Desligando... \n");
@@ -797,8 +946,6 @@ Command commands[NCOMMANDS] =
             .expected_args = 2u,
             //.func = &MOVE_function
         },
-        {
-            .name = "RENAME",
-            .expected_args = 2u,
-            //.func = &RENAME_function
-        }};
+        {.name = "RENAME",
+         .expected_args = 2u,
+         .func = &RENAME_function}};

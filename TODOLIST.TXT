@@ -4,3 +4,6 @@ Se remover o dir que tu está agora, digamos CD root/sla, aí RM root/sla. Na no
 
 //BUG 
 Tratar caso nome de file ou diretorio for maior que o nome maximo estabelecido por nós, no momento o programa só crasha
+
+//MAIN
+tentar carregar um arquivo de dados ja existente antes de criar um novo
