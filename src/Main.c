@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #define CD 0
 #define DIR 1
 #define RM 2
@@ -83,21 +84,26 @@ Arguments get_command_and_args(char *instruction_line, Arguments instruction)
     instruction.num_args = 0u;
     instruction.command_name = strtok(instruction_line_copy, " ");
     //se não há argumentos
-   if (instruction.command_name[strlen(instruction.command_name) - 1] == '\n')
+    if (instruction.command_name[strlen(instruction.command_name) - 1] == '\n')
+    {
         //tira o \n, bota um null no lugar
         instruction.command_name[strlen(instruction.command_name) - 1] = '\0';
+        //apontar instruction.args pra algum lugar pra nao bugar depois
+        instruction.args = instruction_line + strlen(instruction.command_name)+1;
+        //como não ha argumentos vou deixar como "" o argumento pra evitar bugs
+        strcpy(instruction.args,"");
 
+    }
     else
     {
-
         //pega os argumentos, todos juntos tho, com o \n no final
         instruction.args = instruction_line + strlen(instruction.command_name)+1;
         //tirar o \n
         if (instruction.args[strlen(instruction.args) - 1] == '\n')
-        //tira o \n, bota um null no lugar
+            //tira o \n, bota um null no lugar
             instruction.args[strlen(instruction.args) - 1] = '\0';
-       instruction.args = trim(instruction.args);
-       instruction.num_args = countArguments(instruction.args);
+        instruction.args = trim(instruction.args);
+        instruction.num_args = countArguments(instruction.args);
         //!fazer uma funcao para contar os argumentos, considerar argumento entre aspas como um s� -> comando editar
     }
     //free(instruction_line_copy);
@@ -113,12 +119,10 @@ void emulaCMD()
     BYTE ok = 1;//se rodou o comando corretamente = 0,senao = 1
     Arguments instruction;
     instruction.cluster_atual = 0x00;
+    while (1)
+     {
 
-    int ex = 0;
-    while (!ex)
-    {
-
-          if(ok == 0 && i == CD)
+        if(ok == 0 && i == CD)
         {
             free(dirName);
             dirName = (char *)malloc((sizeof(char) * strlen(instruction.args)) + 1);
@@ -133,7 +137,7 @@ void emulaCMD()
         {
            instruction = get_command_and_args(instruction_line,instruction);
 
-           int p;   ///Pra aceitar letra minuscula tbm.
+           int p;   //Pra aceitar letra minuscula tbm.
            for (p=0; instruction.command_name[p] != '\0'; p++)
            {
                instruction.command_name[p] = toupper(instruction.command_name[p]);
@@ -141,9 +145,6 @@ void emulaCMD()
 
             for(i =0; i<NCOMMANDS; i++)
             {
-
-
-
                 //se comando digitado tiver na lista de comandos la
                 if(!strcmp(commands[i].name,instruction.command_name))
                 {
@@ -167,18 +168,37 @@ void emulaCMD()
 int main()
 {
 
+
+
+
     //inicializar a estrutura de arquivos de dados
     //emular o cmd, fazer coisas tipo root\dir> <tal comando>
     FileSystem *arq = (FileSystem *)malloc(sizeof(FileSystem));
-    inicializaArquivo(arq);
-    free(arq);
+    FILE *arqDados;
+
+   if (((arqDados = fopen("arqDados", "rb+")) == NULL) || ((arqDados = fopen("arqDados", "wb+")) == NULL))
+   {
+       fclose(arqDados);
+       InicializaArquivo(arq);
+       free(arq);
+   }
+
+    else
+    {
+        fclose(arqDados);
+        rInicializaArquivo(arq);
+    }
+
+
+
+
 
     emulaCMD();
 
-   // printf("%d\n",sizeof(fileSystem));
-   // printf("%d\n",sizeof(directoryFile));
-   // printf("%d\n",sizeof(metaFiles));
-   // printf("%d\n",sizeof(metaDados));
-   // printf("%d\n",sizeof(cluster));
+    // printf("%d\n",sizeof(fileSystem));
+    // printf("%d\n",sizeof(directoryFile));
+    // printf("%d\n",sizeof(metaFiles));
+    // printf("%d\n",sizeof(metaDados));
+    // printf("%d\n",sizeof(cluster));
     return 0;
 }
