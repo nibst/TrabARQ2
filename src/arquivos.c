@@ -31,7 +31,7 @@ void InicializaIndex(BYTE *ind)
         ind[i] = VAZIO; // inicia o resto como vazio
     }
 }
-
+ 
 void rInicializaIndex(BYTE *ind, int tab[256])
 {
     int i;
