@@ -47,6 +47,17 @@ int errorInvalidPath(Arguments *arguments, Cluster *clus, DirectoryFile *dir, ch
     fclose(arqDados);
     return 1;
 }
+int errorInvalidExtension(char *caminho_arquivo, char* arg_cpy,Cluster *clus, DirectoryFile *dir, FILE *arqDados)
+{
+    printf("[ERROR] Invalid name extension for new name\n\n");
+    free(clus);
+    free(dir);
+    free(caminho_arquivo);
+    free(arg_cpy);
+    fclose(arqDados);
+    return 1;
+
+}
 // mensagem de error, da free em clus e dir, fclose em arqDados e retorna 1
 int errorGettingIndexValue(Cluster *clus, DirectoryFile *dir, FILE *arqDados)
 {

@@ -30,6 +30,9 @@ int errorGettingIndexValue(Cluster *clus, DirectoryFile *dir, FILE *arqDados);
 int errorAllocatingCluster(Cluster *clus, DirectoryFile *dir, FILE *arqDados);
 
 // mensagem de error, da free em clus e dir, fclose em arqDados e retorna 1
+int errorInvalidExtension(char *caminho_arquivo, char* arg_cpy,Cluster *clus, DirectoryFile *dir, FILE *arqDados);
+
+// mensagem de error, da free em clus e dir, fclose em arqDados e retorna 1
 int errorWritingData(Cluster *clus, DirectoryFile *dir, FILE *arqDados);
 
 // mensagem de error, da free em clus, dir e arg_copy, fclose em arqDados e retorna 1

@@ -143,7 +143,7 @@ void emulaCMD()
     {
 
         // funcoes que potencialmente mudam o nome do caminho no console
-        if (ok == 0 && (i == CD || i == RM || i == RENAME))
+        if (ok == 0 && (i == CD || i == RM || i == RENAME || i == MOVE))
         {
             free(path);
             path = (char *)malloc(sizeof(char) * MAX_INSTRUCTION_SIZE);
