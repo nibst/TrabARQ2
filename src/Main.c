@@ -174,7 +174,7 @@ int main()
     FileSystem *arq = (FileSystem *)malloc(sizeof(FileSystem));
     FILE *arqDados;
 
-   if (((arqDados = fopen("arqDados", "rb+")) == NULL))
+   if (((arqDados = fopen("arqDados", "rb")) == NULL))
    {
        fclose(arqDados);
        InicializaArquivo(arq);
