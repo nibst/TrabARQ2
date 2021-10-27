@@ -683,7 +683,7 @@ int EDIT_function(Arguments *arguments)
         if(mudaEstadoIndex(i,index,arqDados))
         {
             free(conteudo_arquivo);
-            return errorEditingIndexTable(caminho_arquivo,clus,dir,arqDados)
+            return errorEditingIndexTable(caminho_arquivo,clus,dir,arqDados);
         }
         // escreve no cluster a string dada de entrada
         offset = 1;
