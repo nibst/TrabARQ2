@@ -21,6 +21,8 @@
 #define EDIT 5
 #define MOVE 6
 #define RENAME 7
+#define EXIT 8
+#define RESET 9
 #define ROOTNAME "root"
 #define MAX_INSTRUCTION_SIZE 1000
 
@@ -143,7 +145,7 @@ void emulaCMD()
     {
 
         // funcoes que potencialmente mudam o nome do caminho no console
-        if (ok == 0 && (i == CD || i == RM || i == RENAME || i == MOVE))
+        if (ok == 0 && (i == CD || i == RM || i == RENAME || i == MOVE || i == RESET))
         {
             free(path);
             path = (char *)malloc(sizeof(char) * MAX_INSTRUCTION_SIZE);

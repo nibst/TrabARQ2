@@ -1150,12 +1150,14 @@ int RESET_function(Arguments *arguments)
 {
     FileSystem *arq = (FileSystem *)malloc(sizeof(FileSystem));
     FILE *arqDados;
+    
     if ((arqDados = fopen("arqDados", "rb+")) == NULL)
     {
         printf("[ERROR] Opening file error\n\n");
         return 1;
     }
     inicializaArquivo(arq);
+    arguments->cluster_atual = 0x00;//vira o root
     printf("File System reseted \n\n");
     return 0;
 }
