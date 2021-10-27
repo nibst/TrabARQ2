@@ -24,29 +24,29 @@
 #define ROOTNAME "root"
 #define MAX_INSTRUCTION_SIZE 1000
 
-//s� os espa�os em branco da esquerda
-char* leftTrim(char *args)
+// s� os espa�os em branco da esquerda
+char *leftTrim(char *args)
 
 {
     int i = 0;
-    while(args[i]== ' ')
+    while (args[i] == ' ')
     {
         args++;
     }
     return args;
 }
-//tira os espa�oes em branco da direita
+// tira os espa�oes em branco da direita
 char *rightTrim(char *args)
 {
-    int i = strlen(args)-1;
-    while(args[i] == ' ')
+    int i = strlen(args) - 1;
+    while (args[i] == ' ')
     {
         args[i] = '\0';
         i--;
     }
     return args;
 }
-char* trim(char *args)
+char *trim(char *args)
 {
     args = leftTrim(args);
     return rightTrim(args);
@@ -100,87 +100,87 @@ int countArguments(char *args)
 Arguments get_command_and_args(char *instruction_line, Arguments instruction)
 {
     char *instruction_line_copy = (char *)malloc(sizeof(char) * strlen(instruction_line) + 1);
-    //fazer copia da linha pq strtok modifica ela
+    // fazer copia da linha pq strtok modifica ela
     strcpy(instruction_line_copy, instruction_line);
     instruction.num_args = 0u;
     instruction.command_name = strtok(instruction_line_copy, " ");
-    //se não há argumentos
+    // se não há argumentos
     if (instruction.command_name[strlen(instruction.command_name) - 1] == '\n')
     {
-        //tira o \n, bota um null no lugar
+        // tira o \n, bota um null no lugar
         instruction.command_name[strlen(instruction.command_name) - 1] = '\0';
-        //apontar instruction.args pra algum lugar pra nao bugar depois
-        instruction.args = instruction_line + strlen(instruction.command_name)+1;
-        //como não ha argumentos vou deixar como "" o argumento pra evitar bugs
-        strcpy(instruction.args,"");
-
+        // apontar instruction.args pra algum lugar pra nao bugar depois
+        instruction.args = instruction_line + strlen(instruction.command_name) + 1;
+        // como não ha argumentos vou deixar como "" o argumento pra evitar bugs
+        strcpy(instruction.args, "");
     }
     else
     {
-        //pega os argumentos, todos juntos tho, com o \n no final
-        instruction.args = instruction_line + strlen(instruction.command_name)+1;
-        //tirar o \n
+        // pega os argumentos, todos juntos tho, com o \n no final
+        instruction.args = instruction_line + strlen(instruction.command_name) + 1;
+        // tirar o \n
         if (instruction.args[strlen(instruction.args) - 1] == '\n')
-            //tira o \n, bota um null no lugar
+            // tira o \n, bota um null no lugar
             instruction.args[strlen(instruction.args) - 1] = '\0';
         instruction.args = trim(instruction.args);
         instruction.num_args = countArguments(instruction.args);
-        //!fazer uma funcao para contar os argumentos, considerar argumento entre aspas como um s� -> comando editar
+        //! fazer uma funcao para contar os argumentos, considerar argumento entre aspas como um s� -> comando editar
     }
-    //free(instruction_line_copy);
+    // free(instruction_line_copy);
     return instruction;
 }
 
 void emulaCMD()
 {
-    char *path = (char *)malloc((sizeof(char) * strlen(ROOTNAME)) + 1);//para armazenar ROOTNAME
-    strcpy(path,ROOTNAME);
-    char *instruction_line = (char *)malloc((sizeof(char) * MAX_INSTRUCTION_SIZE) + 1) ;
-    int i=-1;
-    BYTE ok = 1;//se rodou o comando corretamente = 0,senao = 1
+    char *path = (char *)malloc((sizeof(char) * strlen(ROOTNAME)) + 1); // para armazenar ROOTNAME
+    strcpy(path, ROOTNAME); //comeca com root só como caminho
+    char *instruction_line = (char *)malloc((sizeof(char) * MAX_INSTRUCTION_SIZE) + 1);
+    int i = -1;//numero da operacao
+    BYTE ok = 1; // se rodou o comando corretamente = 0,senao = 1
     Arguments instruction;
     instruction.cluster_atual = 0x00;
     while (1)
-     {
+    {
 
-          if(ok == 0 && (i == CD || i == RM || i == RENAME))
+        // funcoes que potencialmente mudam o nome do caminho no console
+        if (ok == 0 && (i == CD || i == RM || i == RENAME))
         {
             free(path);
             path = (char *)malloc(sizeof(char) * MAX_INSTRUCTION_SIZE);
-            getPathFromClusToRoot(instruction.cluster_atual,path);
+            getPathFromClusToRoot(instruction.cluster_atual, path);
         }
 
-        printf("%s",path);
+        printf("%s", path);
         printf(">");
         fgets(instruction_line, MAX_INSTRUCTION_SIZE, stdin);
-        //se o primeiro caractere não for enter
+        // se o primeiro caractere não for enter
         if (instruction_line[0] != 10)
         {
-           instruction = get_command_and_args(instruction_line,instruction);
+            instruction = get_command_and_args(instruction_line, instruction);
 
-           int p;   //Pra aceitar letra minuscula tbm.
-           for (p=0; instruction.command_name[p] != '\0'; p++)
-           {
-               instruction.command_name[p] = toupper(instruction.command_name[p]);
-           }
-
-            for(i =0; i<NCOMMANDS; i++)
+            int p; // Pra aceitar letra minuscula tbm.
+            for (p = 0; instruction.command_name[p] != '\0'; p++)
             {
-                //se comando digitado tiver na lista de comandos la
-                if(!strcmp(commands[i].name,instruction.command_name))
+                instruction.command_name[p] = toupper(instruction.command_name[p]);
+            }
+
+            for (i = 0; i < NCOMMANDS; i++)
+            {
+                // se comando digitado tiver na lista de comandos la
+                if (!strcmp(commands[i].name, instruction.command_name))
                 {
                     instruction.owner = &commands[i];
-                    //roda funcao daquele comando
+                    // roda funcao daquele comando
                     ok = (commands[i].func)(&instruction);
-                    //a instruction_line_copy da funcao acima vira instruction.command_name na funcao acima
-                    //tem que dar free nela.
+                    // a instruction_line_copy da funcao acima vira instruction.command_name na funcao acima
+                    // tem que dar free nela.
                     free(instruction.command_name);
                     break;
                 }
             }
-            //nao achou comando
-            if(i==NCOMMANDS)
-                printf("INVALID COMMAND: '%s'\n",instruction.command_name);
+            // nao achou comando
+            if (i == NCOMMANDS)
+                printf("INVALID COMMAND: '%s'\n", instruction.command_name);
         }
     }
     free(path);
@@ -190,14 +190,48 @@ void emulaCMD()
 int main()
 {
 
-    //inicializar a estrutura de arquivos de dados
-    //emular o cmd, fazer coisas tipo root\dir> <tal comando>
+    // inicializar a estrutura de arquivos de dados
+    // emular o cmd, fazer coisas tipo root\dir> <tal comando>
     FileSystem *arq = (FileSystem *)malloc(sizeof(FileSystem));
     inicializaArquivo(arq);
     free(arq);
-
     emulaCMD();
 
+
+   /*
+    FILE *lorem;
+    FILE *lipsum;
+    if ((lorem = fopen("lorem.txt", "r+")) == NULL)
+    {
+        printf("\n*** ERRO AO ABRIR ARQUIVO***\n");
+        return 1;
+    }
+    char c;
+    if ((lipsum = fopen("lipsum.txt", "w+")) == NULL)
+    {
+        printf("\n*** ERRO AO ABRIR ARQUIVO***\n");
+        return 1;
+    }
+   while(!feof(lorem))
+    {
+        c = fgetc(lorem);
+        if(c == '\n')
+        {
+            c = ' ';
+        }
+        if (fwrite(&c, sizeof(char), 1, lipsum) != 1)
+        {
+            printf("\n*** ERRO AO TENTAR ESCREVER NO ARQUIVO***\n");
+            fclose(lipsum);
+            fclose(lorem);
+            return 1;
+        }
+
+    }
+    fclose(lipsum);
+    fclose(lorem);
+
+*/
     // printf("%d\n",sizeof(fileSystem));
     // printf("%d\n",sizeof(directoryFile));
     // printf("%d\n",sizeof(metaFiles));

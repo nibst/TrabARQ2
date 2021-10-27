@@ -35,8 +35,16 @@ int errorWritingData(Cluster *clus, DirectoryFile *dir, FILE *arqDados);
 // mensagem de error, da free em clus, dir e arg_copy, fclose em arqDados e retorna 1
 int errorFileDoesNotExist(char *arg_copy, Cluster *clus, DirectoryFile *dir, FILE *arqDados);
 
+// mensagem de error, da free em clus, dir, fclose em arqDados e retorna 1
+int errorFileAlreadyExist(Cluster *clus, DirectoryFile *dir, FILE *arqDados);
+
+// mensagem de error, da free em clus, dir, fclose em arqDados e retorna 1
+int errorDirAlreadyExist(Cluster *clus, DirectoryFile *dir, FILE *arqDados);
+
 // mensagem de error, da free em clus, dir e arg_copy, fclose em arqDados e retorna 1
 int errorDirectoryNotEmpty(char *arg_copy, Cluster *clus, DirectoryFile *dir, FILE *arqDados);
 
 // mensagem de error, da free em clus, dir e arg_copy, fclose em arqDados e retorna 1
 int errorFreeingCluster(char *arg_copy, Cluster *clus, DirectoryFile *dir, FILE *arqDados);
+
+int errorCannotEditDir(char *caminho_arquivo, char *conteudo_arquivo, Cluster *clus, DirectoryFile *dir, FILE *arqDados);

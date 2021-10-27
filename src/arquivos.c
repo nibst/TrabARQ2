@@ -52,8 +52,8 @@ void inicializaClusters(Cluster *clus)
     for (i = 1; i < NUM_CLUSTERS; i++)
     {
         clus[i].cluster_number = i;
-        clus[i].cluster_pai = i;
-        for (j = 1; j < CLUSTER_SIZE - 3; j++)
+        clus[i].cluster_pai = END_OF_FILE;
+        for (j = 0; j < CLUSTER_SIZE - 3; j++)
             clus[i].conteudo[j] = (i % 26) + 65; //!!so para vizualizar lugares "sem nada", depois tirar isso!!
     }
 
@@ -118,7 +118,7 @@ int writeBlockOfData(BYTE cluster, int offset, int sizeBlock, BYTE *data, FILE *
     {
         return 1;
     }
-
+    fflush(arqDados);
     return 0;
 }
 

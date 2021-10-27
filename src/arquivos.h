@@ -16,9 +16,9 @@
 #define CLUSTER_SIZE 32768
 #define CLUSTER_TYPE_DATA 0x01
 #define CLUSTER_TYPE_DIRECTORY_TABLE 0x02
-#define TAM_NOME_MAX 16
+#define TAM_NOME_MAX 121
 #define TAM_EXTENSAO 4 //uma a mais pro fim de string
-#define NUM_METAFILES 1488
+#define NUM_METAFILES 257 //tem a mais do que é possível, mas enfim é a melhor divisao sem deixar muitos bytes sem nada
 #define INVALIDO 0x00
 #define VALIDO 0x01
 #define VAZIO 0x00
@@ -46,14 +46,12 @@ typedef struct Type_MetaFiles
 
 typedef struct Type_DirectoryFile
 {
-    //BYTE valida;//se for valida é 1, se não é 0, ser 0 seria basicamente remover, nao sei se eh necessario aqui ja que tem ja nos metafiles
     char nomeDir[TAM_NOME_MAX];
     char extensao[TAM_EXTENSAO];
-    MetaFiles metafiles[NUM_METAFILES];//!!sla quantos, pode ter varios dps calculo
-
+    MetaFiles metafiles[NUM_METAFILES];
 }DirectoryFile;
 
-//tem que ter 32kb
+//tem que ter 32kb -> 32768
 typedef struct Type_Cluster
 {
     BYTE cluster_type;//como vai ser interpretado os dados a seguir

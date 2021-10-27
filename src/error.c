@@ -11,7 +11,6 @@
 #include <stdlib.h>
 #include "error.h"
 
-
 // mensagem de error, da free em clus e dir, fclose em arqDados e retorna 1
 int errorOpeningFile(Cluster *clus, DirectoryFile *dir, FILE *arqDados)
 {
@@ -85,6 +84,22 @@ int errorFileDoesNotExist(char *arg_copy, Cluster *clus, DirectoryFile *dir, FIL
     fclose(arqDados);
     return 1;
 }
+int errorFileAlreadyExist(Cluster *clus, DirectoryFile *dir, FILE *arqDados)
+{
+    printf("[ERROR] File already exists\n\n");
+    free(clus);
+    free(dir);
+    fclose(arqDados);
+    return 1;
+}
+int errorDirAlreadyExist(Cluster *clus, DirectoryFile *dir, FILE *arqDados)
+{
+    printf("[ERROR] Directory already exists\n\n");
+    free(clus);
+    free(dir);
+    fclose(arqDados);
+    return 1;
+}
 int errorDirectoryNotEmpty(char *arg_copy, Cluster *clus, DirectoryFile *dir, FILE *arqDados)
 {
     printf("[ERROR] Directory not empty\n\n");
@@ -101,6 +116,16 @@ int errorFreeingCluster(char *arg_copy, Cluster *clus, DirectoryFile *dir, FILE 
     free(arg_copy);
     free(clus);
     free(dir);
+    fclose(arqDados);
+    return 1;
+}
+int errorCannotEditDir(char *caminho_arquivo, char *conteudo_arquivo, Cluster *clus, DirectoryFile *dir, FILE *arqDados)
+{
+    printf("[ERROR] Cannot edit a directory\n\n");
+    free(clus);
+    free(dir);
+    free(caminho_arquivo);
+    free(conteudo_arquivo);
     fclose(arqDados);
     return 1;
 }

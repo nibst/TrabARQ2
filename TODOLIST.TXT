@@ -3,3 +3,6 @@ Tratar caso nome de file ou diretorio for maior que o nome maximo estabelecido p
 
 //se der tempo
 Usar o que esta em metadados inves das nossas constantes
+
+//sugestao
+mudar o cluster_pai no criaCluster ao invés de fazer diretamente no mkfile e mkdir
