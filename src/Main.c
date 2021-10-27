@@ -169,25 +169,17 @@ int main()
 {
 
 
-
-
     //inicializar a estrutura de arquivos de dados
     //emular o cmd, fazer coisas tipo root\dir> <tal comando>
     FileSystem *arq = (FileSystem *)malloc(sizeof(FileSystem));
     FILE *arqDados;
 
-   if (((arqDados = fopen("arqDados", "rb+")) == NULL) || ((arqDados = fopen("arqDados", "wb+")) == NULL))
+   if (((arqDados = fopen("arqDados", "rb+")) == NULL))
    {
        fclose(arqDados);
        InicializaArquivo(arq);
        free(arq);
    }
-
-    else
-    {
-        fclose(arqDados);
-        rInicializaArquivo(arq);
-    }
 
 
 
