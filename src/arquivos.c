@@ -301,24 +301,6 @@ int nrMetaFiles(FILE *arqDados, BYTE numCluster)
     return cont;
 }
 
-int getDirName(BYTE numCluster, char dirName[], Cluster *clus, FILE *arqDados)
-{
-    DirectoryFile *dir = (DirectoryFile *)malloc(sizeof(DirectoryFile));
-    if (buscarCluster(numCluster, clus, arqDados))
-    {
-        fclose(arqDados);
-
-        free(dir);
-        return 1;
-    }
-    memcpy(dir, clus->conteudo, sizeof(DirectoryFile));
-
-    strcpy(dirName, dir->nomeDir);
-
-    fclose(arqDados);
-    free(dir);
-    return 0;
-}
 int getPathFromClusToRoot(BYTE numCluster, char *path)
 {
     FILE *arqDados;

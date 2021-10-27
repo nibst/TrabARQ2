@@ -114,8 +114,5 @@ int getIndexMeta(DirectoryFile *dir, char nome[], char extensao[]);
 // retorna o numero de metadados validos no diretorio, retorna 0 se for um arquivo txt,-1 caso ocorra algum erro
 int nrMetaFiles(FILE *arqDados, BYTE index);
 
-//pega o nome do diretorio do cluster numCluster
-int getDirName(BYTE numCluster, char dirName[],Cluster *clus,FILE *arqDados);
-
 // pega o caminho do cluster numCluster até root separando por barras
 int getPathFromClusToRoot(BYTE numCluster, char *path);
