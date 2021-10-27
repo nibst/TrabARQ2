@@ -6,7 +6,7 @@
 ///                     (00326477)  Felipe Kaiser Schnitzler
 ///                     (00323741)  Níkolas Padão Schuster
 ///                     (00275960)  Pedro Afonso Tremea Serpa
-///                     (00xxxxxx)  Ricardo 
+///                     (00xxxxxx)  Ricardo
 
 #include "commands.h"
 #include "arquivos.h"
@@ -15,7 +15,7 @@
 int errorOpeningFile(Cluster *clus, DirectoryFile *dir, FILE *arqDados);
 
 // mensagem de error, da free em clus e dir, fclose em arqDados e retorna 1
-int errorNumArguments(Arguments *arguments, Cluster *clus, DirectoryFile *dir, FILE *arqDados);
+int errorNumArguments(Arguments *arguments, Cluster *clus, DirectoryFile *dir);
 
 // mensagem de error, da free em clus e dir, fclose em arqDados e retorna 1
 int errorGettingCluster(Cluster *clus, DirectoryFile *dir, FILE *arqDados);
@@ -30,13 +30,27 @@ int errorGettingIndexValue(Cluster *clus, DirectoryFile *dir, FILE *arqDados);
 int errorAllocatingCluster(Cluster *clus, DirectoryFile *dir, FILE *arqDados);
 
 // mensagem de error, da free em clus e dir, fclose em arqDados e retorna 1
+int errorInvalidExtension(char *caminho_arquivo, char *arg_cpy, Cluster *clus, DirectoryFile *dir, FILE *arqDados);
+
+// mensagem de error, da free em clus e dir, fclose em arqDados e retorna 1
 int errorWritingData(Cluster *clus, DirectoryFile *dir, FILE *arqDados);
 
 // mensagem de error, da free em clus, dir e arg_copy, fclose em arqDados e retorna 1
 int errorFileDoesNotExist(char *arg_copy, Cluster *clus, DirectoryFile *dir, FILE *arqDados);
+
+// mensagem de error, da free em clus, dir, fclose em arqDados e retorna 1
+int errorFileAlreadyExist(Cluster *clus, DirectoryFile *dir, FILE *arqDados);
+
+// mensagem de error, da free em clus, dir, fclose em arqDados e retorna 1
+int errorDirAlreadyExist(Cluster *clus, DirectoryFile *dir, FILE *arqDados);
 
 // mensagem de error, da free em clus, dir e arg_copy, fclose em arqDados e retorna 1
 int errorDirectoryNotEmpty(char *arg_copy, Cluster *clus, DirectoryFile *dir, FILE *arqDados);
 
 // mensagem de error, da free em clus, dir e arg_copy, fclose em arqDados e retorna 1
 int errorFreeingCluster(char *arg_copy, Cluster *clus, DirectoryFile *dir, FILE *arqDados);
+
+int errorCannotEditDir(char *caminho_arquivo, char *conteudo_arquivo, Cluster *clus, DirectoryFile *dir, FILE *arqDados);
+
+// mensagem de error, da free em clus, dir e arg_copy, fclose em arqDados e retorna 1
+int errorCannotAlterRoot(char *arg_copy, Cluster *clus, DirectoryFile *dir);

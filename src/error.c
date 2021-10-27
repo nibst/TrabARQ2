@@ -5,12 +5,11 @@
 ///                     (00326477)  Felipe Kaiser Schnitzler
 ///                     (00323741)  Níkolas Padão Schuster
 ///                     (00275960)  Pedro Afonso Tremea Serpa
-///                     (00xxxxxx)  Ricardo 
+///                     (00xxxxxx)  Ricardo
 
 #include <stdio.h>
 #include <stdlib.h>
 #include "error.h"
-
 
 // mensagem de error, da free em clus e dir, fclose em arqDados e retorna 1
 int errorOpeningFile(Cluster *clus, DirectoryFile *dir, FILE *arqDados)
@@ -22,12 +21,11 @@ int errorOpeningFile(Cluster *clus, DirectoryFile *dir, FILE *arqDados)
     return 1;
 }
 // mensagem de error, da free em clus e dir, fclose em arqDados e retorna 1
-int errorNumArguments(Arguments *arguments, Cluster *clus, DirectoryFile *dir, FILE *arqDados)
+int errorNumArguments(Arguments *arguments, Cluster *clus, DirectoryFile *dir)
 {
     printf("[ERROR] Expected %u arguments but got %u: '%s'\n\n", arguments->owner->expected_args, arguments->num_args, arguments->args);
     free(clus);
     free(dir);
-    fclose(arqDados);
     return 1;
 }
 // mensagem de error, da free em clus e dir, fclose em arqDados e retorna 1
@@ -46,6 +44,16 @@ int errorInvalidPath(Arguments *arguments, Cluster *clus, DirectoryFile *dir, ch
     free(clus);
     free(dir);
     free(path);
+    fclose(arqDados);
+    return 1;
+}
+int errorInvalidExtension(char *caminho_arquivo, char *arg_cpy, Cluster *clus, DirectoryFile *dir, FILE *arqDados)
+{
+    printf("[ERROR] Invalid name extension for new name\n\n");
+    free(clus);
+    free(dir);
+    free(caminho_arquivo);
+    free(arg_cpy);
     fclose(arqDados);
     return 1;
 }
@@ -86,6 +94,22 @@ int errorFileDoesNotExist(char *arg_copy, Cluster *clus, DirectoryFile *dir, FIL
     fclose(arqDados);
     return 1;
 }
+int errorFileAlreadyExist(Cluster *clus, DirectoryFile *dir, FILE *arqDados)
+{
+    printf("[ERROR] File already exists\n\n");
+    free(clus);
+    free(dir);
+    fclose(arqDados);
+    return 1;
+}
+int errorDirAlreadyExist(Cluster *clus, DirectoryFile *dir, FILE *arqDados)
+{
+    printf("[ERROR] Directory already exists\n\n");
+    free(clus);
+    free(dir);
+    fclose(arqDados);
+    return 1;
+}
 int errorDirectoryNotEmpty(char *arg_copy, Cluster *clus, DirectoryFile *dir, FILE *arqDados)
 {
     printf("[ERROR] Directory not empty\n\n");
@@ -103,5 +127,23 @@ int errorFreeingCluster(char *arg_copy, Cluster *clus, DirectoryFile *dir, FILE 
     free(clus);
     free(dir);
     fclose(arqDados);
+    return 1;
+}
+int errorCannotEditDir(char *caminho_arquivo, char *conteudo_arquivo, Cluster *clus, DirectoryFile *dir, FILE *arqDados)
+{
+    printf("[ERROR] Cannot edit a directory\n\n");
+    free(clus);
+    free(dir);
+    free(caminho_arquivo);
+    free(conteudo_arquivo);
+    fclose(arqDados);
+    return 1;
+}
+int errorCannotAlterRoot(char *arg_copy, Cluster *clus, DirectoryFile *dir)
+{
+    printf("[ERROR] Cannot Alter root\n\n");
+    free(arg_copy);
+    free(clus);
+    free(dir);
     return 1;
 }

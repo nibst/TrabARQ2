@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "arquivos.h"
+#define MAX_INSTRUCTION_SIZE 1000
 void inicializaMetadados(MetaDados *meta)
 {
     meta->tamanho_indice = NUM_INDICES;
@@ -21,11 +22,12 @@ void inicializaMetadados(MetaDados *meta)
 void inicializaIndex(BYTE *ind)
 {
     int i;
-    ind[0] = END_OF_FILE; // inicia o root como eof
-    for (i = 1; i < NUM_INDICES; i++)
+    ind[0] = END_OF_FILE; // inicia o root como eof, pra indicar que tem conteudo dentro
+    for (i = 1; i < NUM_INDICES - 1; i++)
     {
         ind[i] = VAZIO; // inicia o resto como vazio
     }
+    ind[i] = END_OF_FILE; // ultimo cluster é especifico pra indicar end of file, nao pode ser usado
 }
 
 void inicializaClusters(Cluster *clus)
@@ -43,13 +45,15 @@ void inicializaClusters(Cluster *clus)
 
     clus[0].cluster_type = CLUSTER_TYPE_DIRECTORY_TABLE;
     clus[0].cluster_number = 0;
+    clus[0].cluster_pai = 0;
 
     memcpy(clus[0].conteudo, root, sizeof(DirectoryFile));
 
     for (i = 1; i < NUM_CLUSTERS; i++)
     {
         clus[i].cluster_number = i;
-        for (j = 1; j < CLUSTER_SIZE - 3; j++)
+        clus[i].cluster_pai = END_OF_FILE;
+        for (j = 0; j < CLUSTER_SIZE - 3; j++)
             clus[i].conteudo[j] = (i % 26) + 65; //!!so para vizualizar lugares "sem nada", depois tirar isso!!
     }
 
@@ -114,7 +118,7 @@ int writeBlockOfData(BYTE cluster, int offset, int sizeBlock, BYTE *data, FILE *
     {
         return 1;
     }
-
+    fflush(arqDados);
     return 0;
 }
 
@@ -297,34 +301,73 @@ int nrMetaFiles(FILE *arqDados, BYTE numCluster)
     return cont;
 }
 
-/*int getDirName(BYTE numCluster, char dirName[])
+int getPathFromClusToRoot(BYTE numCluster, char *path)
 {
     FILE *arqDados;
     Cluster *clus = (Cluster *)malloc(sizeof(Cluster));
     DirectoryFile *dir = (DirectoryFile *)malloc(sizeof(DirectoryFile));
-
+    char *path_aux = (char *)malloc(sizeof(char) * MAX_INSTRUCTION_SIZE);
+    int i;
     if ((arqDados = fopen("arqDados", "rb+")) == NULL)
     {
-        free(clus);
         free(dir);
-        printf("\n*** ERRO AO ABRIR ARQUIVO***\n");
+        free(clus);
+        free(path_aux);
         return 1;
     }
+    //enquanto cluster nao for root
+    strcpy(path_aux,"");
+    while (numCluster != 0)
+    {
+        if (buscarCluster(numCluster, clus, arqDados))
+        {
+            fclose(arqDados);
+            free(clus);
+            free(dir);
+            free(path_aux);
+            return 1;
+        }
+        memcpy(dir, clus->conteudo, sizeof(DirectoryFile));
 
+        strcpy(path, dir->nomeDir);
+
+        strcat(path_aux, path);
+        strcat(path_aux, "/");
+        numCluster = clus->cluster_pai;
+    }
     if (buscarCluster(numCluster, clus, arqDados))
     {
         fclose(arqDados);
         free(clus);
         free(dir);
+        free(path_aux);
         return 1;
     }
     memcpy(dir, clus->conteudo, sizeof(DirectoryFile));
 
-    strcpy(dirName,dir->nomeDir);
+    strcpy(path, dir->nomeDir);
+    strcat(path_aux, path);
 
+    int tam = strlen(path_aux);
+    strcpy(path,"");
+    i = tam- 1;
+    while(i>=0)
+    {
+        while ((path_aux[i] != '/') && i >= 0)
+            i--;
+        if(i>=0)
+        {
+            path_aux[i] = '\0';
+            strcat(path, path_aux + i + 1);
+            strcat(path,"/");
+        }
+        else
+            strcat(path, path_aux);
+    }
     fclose(arqDados);
     free(clus);
     free(dir);
+    free(path_aux);
     return 0;
+}
 
-}*/

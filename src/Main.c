@@ -132,24 +132,25 @@ Arguments get_command_and_args(char *instruction_line, Arguments instruction)
 
 void emulaCMD()
 {
-    char *dirName = (char *)malloc((sizeof(char) * strlen(ROOTNAME)) + 1); // para armazenar ROOTNAME
-    strcpy(dirName, ROOTNAME);
+    char *path = (char *)malloc((sizeof(char) * strlen(ROOTNAME)) + 1); // para armazenar ROOTNAME
+    strcpy(path, ROOTNAME); //comeca com root só como caminho
     char *instruction_line = (char *)malloc((sizeof(char) * MAX_INSTRUCTION_SIZE) + 1);
-    int i = -1;
+    int i = -1;//numero da operacao
     BYTE ok = 1; // se rodou o comando corretamente = 0,senao = 1
     Arguments instruction;
     instruction.cluster_atual = 0x00;
     while (1)
     {
 
-        if (ok == 0 && i == CD)
+        // funcoes que potencialmente mudam o nome do caminho no console
+        if (ok == 0 && (i == CD || i == RM || i == RENAME || i == MOVE))
         {
-            free(dirName);
-            dirName = (char *)malloc((sizeof(char) * strlen(instruction.args)) + 1);
-            strcpy(dirName, instruction.args);
+            free(path);
+            path = (char *)malloc(sizeof(char) * MAX_INSTRUCTION_SIZE);
+            getPathFromClusToRoot(instruction.cluster_atual, path);
         }
 
-        printf("%s", dirName);
+        printf("%s", path);
         printf(">");
         fgets(instruction_line, MAX_INSTRUCTION_SIZE, stdin);
         // se o primeiro caractere não for enter
@@ -182,6 +183,7 @@ void emulaCMD()
                 printf("INVALID COMMAND: '%s'\n", instruction.command_name);
         }
     }
+    free(path);
     free(instruction_line);
 }
 
@@ -193,9 +195,43 @@ int main()
     FileSystem *arq = (FileSystem *)malloc(sizeof(FileSystem));
     inicializaArquivo(arq);
     free(arq);
-
     emulaCMD();
 
+
+   /*
+    FILE *lorem;
+    FILE *lipsum;
+    if ((lorem = fopen("lorem.txt", "r+")) == NULL)
+    {
+        printf("\n*** ERRO AO ABRIR ARQUIVO***\n");
+        return 1;
+    }
+    char c;
+    if ((lipsum = fopen("lipsum.txt", "w+")) == NULL)
+    {
+        printf("\n*** ERRO AO ABRIR ARQUIVO***\n");
+        return 1;
+    }
+   while(!feof(lorem))
+    {
+        c = fgetc(lorem);
+        if(c == '\n')
+        {
+            c = ' ';
+        }
+        if (fwrite(&c, sizeof(char), 1, lipsum) != 1)
+        {
+            printf("\n*** ERRO AO TENTAR ESCREVER NO ARQUIVO***\n");
+            fclose(lipsum);
+            fclose(lorem);
+            return 1;
+        }
+
+    }
+    fclose(lipsum);
+    fclose(lorem);
+
+*/
     // printf("%d\n",sizeof(fileSystem));
     // printf("%d\n",sizeof(directoryFile));
     // printf("%d\n",sizeof(metaFiles));
