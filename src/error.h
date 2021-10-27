@@ -1,12 +1,11 @@
-
 ///             Arquitetura e Organização de Computadores II
 ///                   Trabalho 2: Light File System
 ///
 ///             Alunos:
 ///                     (00326477)  Felipe Kaiser Schnitzler
-///                     (00323741)  Níkolas Padão Schuster
+///                     (00323741)  Nikolas Padão
 ///                     (00275960)  Pedro Afonso Tremea Serpa
-///                     (00xxxxxx)  Ricardo
+///                     (00325735)  Ricardo Hermes Dalcin
 
 #include "commands.h"
 #include "arquivos.h"
@@ -30,7 +29,7 @@ int errorGettingIndexValue(Cluster *clus, DirectoryFile *dir, FILE *arqDados);
 int errorAllocatingCluster(Cluster *clus, DirectoryFile *dir, FILE *arqDados);
 
 // mensagem de error, da free em clus e dir, fclose em arqDados e retorna 1
-int errorInvalidExtension(char *caminho_arquivo, char* arg_cpy,Cluster *clus, DirectoryFile *dir, FILE *arqDados);
+int errorInvalidExtension(char *caminho_arquivo, char *arg_cpy, Cluster *clus, DirectoryFile *dir, FILE *arqDados);
 
 // mensagem de error, da free em clus e dir, fclose em arqDados e retorna 1
 int errorWritingData(Cluster *clus, DirectoryFile *dir, FILE *arqDados);
@@ -48,6 +47,13 @@ int errorDirAlreadyExist(Cluster *clus, DirectoryFile *dir, FILE *arqDados);
 int errorDirectoryNotEmpty(char *arg_copy, Cluster *clus, DirectoryFile *dir, FILE *arqDados);
 
 // mensagem de error, da free em clus, dir e arg_copy, fclose em arqDados e retorna 1
-int errorFreeingCluster(char *arg_copy, Cluster *clus, DirectoryFile *dir, FILE *arqDados);
+int errorEditingIndexTable(char *arg_copy, Cluster *clus, DirectoryFile *dir, FILE *arqDados);
 
 int errorCannotEditDir(char *caminho_arquivo, char *conteudo_arquivo, Cluster *clus, DirectoryFile *dir, FILE *arqDados);
+
+// mensagem de error, da free em clus, dir e arg_copy, fclose em arqDados e retorna 1
+int errorCannotAlterRoot(char *arg_copy, Cluster *clus, DirectoryFile *dir);
+
+int errorHigherHierarchyToLower(MetaFiles *meta, char *arg_cpy, char *path_file,Cluster *clus, DirectoryFile *dir, FILE *arqDados);
+
+

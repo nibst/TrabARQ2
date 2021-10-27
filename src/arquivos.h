@@ -3,9 +3,9 @@
 ///
 ///             Alunos:
 ///                     (00326477)  Felipe Kaiser Schnitzler
-///                     (00323741)  Níkolas Padão Schuster
+///                     (00323741)  Nikolas Padão
 ///                     (00275960)  Pedro Afonso Tremea Serpa
-///                     (00xxxxxx)  Ricardo
+///                     (00325735)  Ricardo Hermes Dalcin
 
 #include <stdio.h>
 
@@ -76,10 +76,8 @@ void inicializaIndex(BYTE *ind);
 
 void inicializaClusters(Cluster *clus);
 
-//fazer funcao de ler e armazenar arquivo binario
+//escreve todo o file system
 int writeFileSystem(FileSystem *arq);
-
-int readFileSystem(FileSystem *arq);
 
 void inicializaArquivo(FileSystem *arq);
 
@@ -116,3 +114,7 @@ int nrMetaFiles(FILE *arqDados, BYTE index);
 
 // pega o caminho do cluster numCluster até root separando por barras
 int getPathFromClusToRoot(BYTE numCluster, char *path);
+
+//retorna 1 se o cluster está dentro do clusN ou se são o msm cluster
+//retorna 0 caso o contrario
+int clusIsInsideOfClusN(Cluster *clus, BYTE clusN, FILE *arqDados);

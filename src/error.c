@@ -3,10 +3,9 @@
 ///
 ///             Alunos:
 ///                     (00326477)  Felipe Kaiser Schnitzler
-///                     (00323741)  Níkolas Padão Schuster
+///                     (00323741)  Nikolas Padão
 ///                     (00275960)  Pedro Afonso Tremea Serpa
-///                     (00xxxxxx)  Ricardo
-
+///                     (00325735)  Ricardo Hermes Dalcin
 #include <stdio.h>
 #include <stdlib.h>
 #include "error.h"
@@ -14,7 +13,7 @@
 // mensagem de error, da free em clus e dir, fclose em arqDados e retorna 1
 int errorOpeningFile(Cluster *clus, DirectoryFile *dir, FILE *arqDados)
 {
-    printf("\n*** ERRO AO ABRIR ARQUIVO***\n\n");
+    printf("[ERROR] Opening file error\n\n");
     free(clus);
     free(dir);
     fclose(arqDados);
@@ -47,7 +46,7 @@ int errorInvalidPath(Arguments *arguments, Cluster *clus, DirectoryFile *dir, ch
     fclose(arqDados);
     return 1;
 }
-int errorInvalidExtension(char *caminho_arquivo, char* arg_cpy,Cluster *clus, DirectoryFile *dir, FILE *arqDados)
+int errorInvalidExtension(char *caminho_arquivo, char *arg_cpy, Cluster *clus, DirectoryFile *dir, FILE *arqDados)
 {
     printf("[ERROR] Invalid name extension for new name\n\n");
     free(clus);
@@ -56,7 +55,6 @@ int errorInvalidExtension(char *caminho_arquivo, char* arg_cpy,Cluster *clus, Di
     free(arg_cpy);
     fclose(arqDados);
     return 1;
-
 }
 // mensagem de error, da free em clus e dir, fclose em arqDados e retorna 1
 int errorGettingIndexValue(Cluster *clus, DirectoryFile *dir, FILE *arqDados)
@@ -121,9 +119,9 @@ int errorDirectoryNotEmpty(char *arg_copy, Cluster *clus, DirectoryFile *dir, FI
     return 1;
 }
 
-int errorFreeingCluster(char *arg_copy, Cluster *clus, DirectoryFile *dir, FILE *arqDados)
+int errorEditingIndexTable(char *arg_copy, Cluster *clus, DirectoryFile *dir, FILE *arqDados)
 {
-    printf("[ERROR] Error in freeing cluster\n\n");
+    printf("[ERROR] Editing index table error\n\n");
     free(arg_copy);
     free(clus);
     free(dir);
@@ -139,4 +137,24 @@ int errorCannotEditDir(char *caminho_arquivo, char *conteudo_arquivo, Cluster *c
     free(conteudo_arquivo);
     fclose(arqDados);
     return 1;
+}
+int errorCannotAlterRoot(char *arg_copy, Cluster *clus, DirectoryFile *dir)
+{
+    printf("[ERROR] Cannot alter root\n\n");
+    free(arg_copy);
+    free(clus);
+    free(dir);
+    return 1;
+}
+int errorHigherHierarchyToLower(MetaFiles *meta, char *arg_cpy, char *path_file,Cluster *clus, DirectoryFile *dir, FILE *arqDados)
+{
+    printf("[ERROR] Cannot move a directory that contains a directory N to this directory N\n\n");
+    free(meta);
+    free(arg_cpy);
+    free(path_file);
+    free(clus);
+    free(dir);
+    fclose(arqDados);
+    return 1;
+
 }

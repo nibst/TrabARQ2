@@ -3,9 +3,9 @@
 ///
 ///             Alunos:
 ///                     (00326477)  Felipe Kaiser Schnitzler
-///                     (00323741)  Níkolas Padão Schuster
+///                     (00323741)  Nikolas Padão
 ///                     (00275960)  Pedro Afonso Tremea Serpa
-///                     (00xxxxxx)  Ricardo
+///                     (00325735)  Ricardo Hermes Dalcin
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,7 +37,6 @@ void inicializaClusters(Cluster *clus)
     // cluster 0 simboliza cluster vazio e tamb�m cont�m o root
     // primeiro cluster tem o root directory (padrao)
     DirectoryFile *root = (DirectoryFile *)malloc(sizeof(DirectoryFile));
-    memset(root, 'x', sizeof(DirectoryFile));
     strcpy(root->nomeDir, "root");
     strcpy(root->extensao, "dir");
     for (i = 0; i < NUM_METAFILES; i++)
@@ -45,7 +44,7 @@ void inicializaClusters(Cluster *clus)
 
     clus[0].cluster_type = CLUSTER_TYPE_DIRECTORY_TABLE;
     clus[0].cluster_number = 0;
-    clus[0].cluster_pai = 0;
+    clus[0].cluster_pai = END_OF_FILE;
 
     memcpy(clus[0].conteudo, root, sizeof(DirectoryFile));
 
@@ -54,7 +53,7 @@ void inicializaClusters(Cluster *clus)
         clus[i].cluster_number = i;
         clus[i].cluster_pai = END_OF_FILE;
         for (j = 0; j < CLUSTER_SIZE - 3; j++)
-            clus[i].conteudo[j] = (i % 26) + 65; //!!so para vizualizar lugares "sem nada", depois tirar isso!!
+            clus[i].conteudo[j] = INVALIDO;
     }
 
     free(root);
@@ -72,39 +71,19 @@ int writeFileSystem(FileSystem *arq)
 
     if ((arqDados = fopen("arqDados", "wb")) == NULL)
     {
-        printf("\n*** ERRO AO CRIAR ARQUIVO***\n");
+        printf("[ERROR] Opening file error\n\n");
         return 1;
     }
 
     if (fwrite(arq, sizeof(FileSystem), 1, arqDados) != 1)
     {
-        printf("\n*** ERRO AO TENTAR ESCREVER NO ARQUIVO***\n");
+        printf("[ERROR] Error in writing data\n\n");
         fclose(arqDados);
         return 1;
     }
     fclose(arqDados);
     return 0;
 }
-
-int readFileSystem(FileSystem *arq)
-{
-    FILE *arqDados;
-
-    if ((arqDados = fopen("arqDados", "rb+")) == NULL)
-    {
-        printf("\n*** ERRO AO ABRIR ARQUIVO***\n");
-        return 1;
-    }
-    if (fread(arq, sizeof(FileSystem), 1, arqDados) != 1)
-    {
-        printf("\n*** ERRO AO TENTAR LER DO ARQUIVO***\n");
-        fclose(arqDados);
-        return 1;
-    }
-    fclose(arqDados);
-    return 0;
-}
-
 // escreve um dado de tamanho escolhido no parametro em um cluster escolhido no parametro e em certo offset dentro do cluster
 int writeBlockOfData(BYTE cluster, int offset, int sizeBlock, BYTE *data, FILE *arqDados)
 {
@@ -368,6 +347,17 @@ int getPathFromClusToRoot(BYTE numCluster, char *path)
     free(clus);
     free(dir);
     free(path_aux);
+    return 0;
+}
+int clusIsInsideOfClusN(Cluster *clus, BYTE clusN, FILE *arqDados)
+{
+    while(clus->cluster_pai != END_OF_FILE)
+    {
+        if(clus->cluster_number == clusN)
+            return 1;
+        if(buscarCluster(clus->cluster_pai,clus,arqDados))
+            return 1;
+    }
     return 0;
 }
 

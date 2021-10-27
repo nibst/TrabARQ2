@@ -3,9 +3,9 @@
 ///
 ///             Alunos:
 ///                     (00326477)  Felipe Kaiser Schnitzler
-///                     (00323741)  Níkolas Padão Schuster
+///                     (00323741)  Nikolas Padão
 ///                     (00275960)  Pedro Afonso Tremea Serpa
-///                     (00xxxxxx)  Ricardo
+///                     (00325735)  Ricardo Hermes Dalcin
 
 #include "commands.h"
 #include "arquivos.h"
@@ -190,48 +190,17 @@ void emulaCMD()
 int main()
 {
 
-    // inicializar a estrutura de arquivos de dados
-    // emular o cmd, fazer coisas tipo root\dir> <tal comando>
+    FILE *arqDados;
     FileSystem *arq = (FileSystem *)malloc(sizeof(FileSystem));
-    inicializaArquivo(arq);
+    if (((arqDados = fopen("arqDados", "rb")) == NULL))
+    {
+        fclose(arqDados);
+        inicializaArquivo(arq);
+        free(arq);
+    }
     free(arq);
     emulaCMD();
 
-
-   /*
-    FILE *lorem;
-    FILE *lipsum;
-    if ((lorem = fopen("lorem.txt", "r+")) == NULL)
-    {
-        printf("\n*** ERRO AO ABRIR ARQUIVO***\n");
-        return 1;
-    }
-    char c;
-    if ((lipsum = fopen("lipsum.txt", "w+")) == NULL)
-    {
-        printf("\n*** ERRO AO ABRIR ARQUIVO***\n");
-        return 1;
-    }
-   while(!feof(lorem))
-    {
-        c = fgetc(lorem);
-        if(c == '\n')
-        {
-            c = ' ';
-        }
-        if (fwrite(&c, sizeof(char), 1, lipsum) != 1)
-        {
-            printf("\n*** ERRO AO TENTAR ESCREVER NO ARQUIVO***\n");
-            fclose(lipsum);
-            fclose(lorem);
-            return 1;
-        }
-
-    }
-    fclose(lipsum);
-    fclose(lorem);
-
-*/
     // printf("%d\n",sizeof(fileSystem));
     // printf("%d\n",sizeof(directoryFile));
     // printf("%d\n",sizeof(metaFiles));

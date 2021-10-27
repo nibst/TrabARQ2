@@ -3,11 +3,11 @@
 ///
 ///             Alunos:
 ///                     (00326477)  Felipe Kaiser Schnitzler
-///                     (00323741)  Níkolas Padão Schuster
+///                     (00323741)  Nikolas Padão
 ///                     (00275960)  Pedro Afonso Tremea Serpa
-///                     (00xxxxxx)  Ricardo 
+///                     (00325735)  Ricardo Hermes Dalcin
 
-#define NCOMMANDS 9
+#define NCOMMANDS 10
 
 struct type_command;
 
@@ -38,5 +38,6 @@ int EDIT_function(Arguments *arguments);
 int MOVE_function(Arguments *arguments);
 int RENAME_function(Arguments *arguments);
 int EXIT_function(Arguments *arguments);
+int RESET_function(Arguments *arguments);
 
 Command commands[NCOMMANDS];
