@@ -2,10 +2,11 @@
 ///                   Trabalho 2: Light File System
 ///
 ///             Alunos:
-///                     (00326477)  Felipe Kaiser Schnitzler
-///                     (00323741)  Nikolas Padão
-///                     (00275960)  Pedro Afonso Tremea Serpa
-///                     (00325735)  Ricardo Hermes Dalcin
+///                     (00326477)  Felipe Kaiser Schnitzler - TURMA B
+///                     (00323741)  Nikolas Padão - TURMA B
+///                     (00275960)  Pedro Afonso Tremea Serpa - TURMA B
+///                     (00325735)  Ricardo Hermes Dalcin - TURMA A
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "error.h"

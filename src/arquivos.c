@@ -2,10 +2,11 @@
 ///                   Trabalho 2: Light File System
 ///
 ///             Alunos:
-///                     (00326477)  Felipe Kaiser Schnitzler
-///                     (00323741)  Nikolas Padão
-///                     (00275960)  Pedro Afonso Tremea Serpa
-///                     (00325735)  Ricardo Hermes Dalcin
+///                     (00326477)  Felipe Kaiser Schnitzler - TURMA B
+///                     (00323741)  Nikolas Padão - TURMA B
+///                     (00275960)  Pedro Afonso Tremea Serpa - TURMA B
+///                     (00325735)  Ricardo Hermes Dalcin - TURMA A
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -103,7 +104,7 @@ int writeBlockOfData(BYTE cluster, int offset, int sizeBlock, BYTE *data, FILE *
     if (readMetaDados(&meta, arqDados))
         return 1;
     int end_cluster = calcEndCluster(cluster, meta);
-    
+
     if ((fseek(arqDados, offset + end_cluster, SEEK_SET)))
     {
         return 1;
@@ -378,11 +379,13 @@ int getPathFromClusToRoot(BYTE numCluster, char *path)
 }
 int clusIsInsideOfClusN(Cluster *clus, BYTE clusN, FILE *arqDados)
 {
-    while (clus->cluster_pai != END_OF_FILE)
+    Cluster *clus_cpy = (Cluster *)malloc(sizeof(Cluster));
+    memcpy(clus_cpy,clus,sizeof(Cluster));
+    while(clus_cpy->cluster_pai != END_OF_FILE)
     {
-        if (clus->cluster_number == clusN)
+        if(clus_cpy->cluster_number == clusN)
             return 1;
-        if (buscarCluster(clus->cluster_pai, clus, arqDados))
+        if(buscarCluster(clus_cpy->cluster_pai,clus_cpy,arqDados))
             return 1;
     }
     return 0;
