@@ -65,9 +65,8 @@ typedef struct Type_Cluster
 typedef struct Type_FileSystem
 {
     MetaDados meta;
-    BYTE indice[NUM_INDICES];//TODO colocar como constante, o indice i aponta o proximo cluster do cluster de numero i.
-    Cluster clusters[NUM_CLUSTERS];//TODO colocar como constante
-
+    BYTE indice[NUM_INDICES];
+    Cluster clusters[NUM_CLUSTERS];
 } FileSystem;
 
 void inicializaMetadados(MetaDados *meta);
@@ -84,7 +83,7 @@ void inicializaArquivo(FileSystem *arq);
 int writeBlockOfData(BYTE cluster,int offset,int sizeBlock, BYTE *data,FILE *arqDados);
 
 //retorna o indice do 1 cluster vazio, EOF caso ocorra algum erro
-int getEmptyCluster(FILE *arqDados);
+int getEmptyCluster(FILE *arqDados, MetaDados meta);
 
 //insere o cluster correspondente ao indice x em clus, retorna 1 caso ocorra algum erro
 int buscarCluster(BYTE x, Cluster *clus, FILE *arqDados);
@@ -93,7 +92,7 @@ int buscarCluster(BYTE x, Cluster *clus, FILE *arqDados);
 BYTE getArq(DirectoryFile *dir, char nome[]);
 
 //retorna o endereco do byte do cluster de indice x(ex calcEndCluster(0) = 264)
-int calcEndCluster(BYTE x);
+int calcEndCluster(BYTE x, MetaDados meta);
 
 //aloca um cluster na memoria
 //nao altera o conteudo do cluster
@@ -112,7 +111,7 @@ int getIndexMeta(DirectoryFile *dir, char nome[], char extensao[]);
 // retorna o numero de metadados validos no diretorio, retorna 0 se for um arquivo txt,-1 caso ocorra algum erro
 int nrMetaFiles(FILE *arqDados, BYTE index);
 
-// pega o caminho do cluster numCluster até root separando por barras
+//Monta o caminho do root até certa pasta a partir dessa certa pasta(faz o caminho inverso pasta->root)
 int getPathFromClusToRoot(BYTE numCluster, char *path);
 
 //retorna 1 se o cluster está dentro do clusN ou se são o msm cluster

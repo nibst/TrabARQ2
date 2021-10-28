@@ -84,11 +84,26 @@ int writeFileSystem(FileSystem *arq)
     fclose(arqDados);
     return 0;
 }
+int readMetaDados(MetaDados *meta, FILE *arqDados)
+{
+    if (fseek(arqDados, 0, SEEK_SET))
+    {
+        return 1;
+    }
+    if (fread(meta, sizeof(MetaDados), 1, arqDados) != 1)
+    {
+        return 1;
+    }
+    return 0;
+}
 // escreve um dado de tamanho escolhido no parametro em um cluster escolhido no parametro e em certo offset dentro do cluster
 int writeBlockOfData(BYTE cluster, int offset, int sizeBlock, BYTE *data, FILE *arqDados)
 {
-    int end_cluster = calcEndCluster(cluster);
+    MetaDados meta;
 
+    int end_cluster = calcEndCluster(cluster, meta);
+    if (readMetaDados(&meta, arqDados))
+        return 1;
     if ((fseek(arqDados, offset + end_cluster, SEEK_SET)))
     {
         return 1;
@@ -101,16 +116,16 @@ int writeBlockOfData(BYTE cluster, int offset, int sizeBlock, BYTE *data, FILE *
     return 0;
 }
 
-int getEmptyCluster(FILE *arqDados)
+int getEmptyCluster(FILE *arqDados, MetaDados meta)
 {
     BYTE aux;
     int i;
 
-    if ((fseek(arqDados, (INI_INDICE + 1), SEEK_SET))) // comeca a procurar pelo 2 indice, pois o 1 eh sempre a root
+    if ((fseek(arqDados, (meta.inicio_indices + 1), SEEK_SET))) // comeca a procurar pelo 2 indice, pois o 1 eh sempre a root
     {
         return END_OF_FILE;
     }
-    for (i = 1; i < NUM_INDICES; i++)
+    for (i = 1; i < meta.tamanho_indice; i++)
     {
         aux = fgetc(arqDados);
         if (aux == VAZIO)
@@ -123,13 +138,16 @@ int getEmptyCluster(FILE *arqDados)
 // insere o cluster de numero numCluster em clus, retorna 1 caso ocorra algum erro
 int buscarCluster(BYTE numCluster, Cluster *clus, FILE *arqDados)
 {
+    MetaDados meta;
+    if (readMetaDados(&meta, arqDados))
+        return 1;
 
-    if ((fseek(arqDados, calcEndCluster(numCluster), SEEK_SET)))
+    if ((fseek(arqDados, calcEndCluster(numCluster, meta), SEEK_SET)))
     {
         return 1;
     }
 
-    if (fread(clus, CLUSTER_SIZE, 1, arqDados) != 1)
+    if (fread(clus, meta.tamanho_cluster, 1, arqDados) != 1)
     {
         return 1;
     }
@@ -155,9 +173,9 @@ BYTE getArq(DirectoryFile *dir, char nome[])
 }
 
 // retorna o endereco do byte do cluster de indice x(ex calcEndCluster(0) = 264)
-int calcEndCluster(BYTE x)
+int calcEndCluster(BYTE x, MetaDados meta)
 {
-    return (INI_ROOT + (CLUSTER_SIZE * x));
+    return (meta.prim_cluster + (meta.tamanho_cluster * x));
 }
 
 // aloca um cluster na memoria
@@ -165,9 +183,11 @@ int calcEndCluster(BYTE x)
 // retorna 1 caso ocorra algum erro
 int criaCluster(char extensao[], FILE *arqDados, BYTE *index)
 {
+    MetaDados meta;
     BYTE tipocluster;
-
-    *index = getEmptyCluster(arqDados);
+    if (readMetaDados(&meta, arqDados))
+        return 1;
+    *index = getEmptyCluster(arqDados, meta);
 
     if (*index == END_OF_FILE)
     {
@@ -179,7 +199,7 @@ int criaCluster(char extensao[], FILE *arqDados, BYTE *index)
         return 1;
     }
 
-    if ((fseek(arqDados, calcEndCluster(*index), SEEK_SET)))
+    if ((fseek(arqDados, calcEndCluster(*index, meta), SEEK_SET)))
     {
         return 1;
     }
@@ -205,7 +225,10 @@ int criaCluster(char extensao[], FILE *arqDados, BYTE *index)
 // muda o valor do index para novoEstado(VAZIO,EOF,PONTEIRO), retorna 1 caso ocorra algum erro, senao retorna 0
 int mudaEstadoIndex(BYTE index, BYTE novoEstado, FILE *arqDados)
 {
-    if ((fseek(arqDados, (INI_INDICE + index), SEEK_SET)))
+    MetaDados meta;
+    if (readMetaDados(&meta, arqDados))
+        return 1;
+    if ((fseek(arqDados, (meta.inicio_indices + index), SEEK_SET)))
     {
         return 1;
     }
@@ -220,7 +243,10 @@ int mudaEstadoIndex(BYTE index, BYTE novoEstado, FILE *arqDados)
 // pega o valor que está no indice "index" da tabela
 int getValorIndex(BYTE index, FILE *arqDados, BYTE *value)
 {
-    if ((fseek(arqDados, (INI_INDICE + index), SEEK_SET)))
+    MetaDados meta;
+    if (readMetaDados(&meta, arqDados))
+        return 1;
+    if ((fseek(arqDados, (meta.inicio_indices + index), SEEK_SET)))
     {
         return 1;
     }
@@ -280,6 +306,7 @@ int nrMetaFiles(FILE *arqDados, BYTE numCluster)
     return cont;
 }
 
+// Monta o caminho do root até certa pasta a partir dessa certa pasta(faz o caminho inverso pasta->root)
 int getPathFromClusToRoot(BYTE numCluster, char *path)
 {
     FILE *arqDados;
@@ -294,8 +321,8 @@ int getPathFromClusToRoot(BYTE numCluster, char *path)
         free(path_aux);
         return 1;
     }
-    //enquanto cluster nao for root
-    strcpy(path_aux,"");
+    // enquanto cluster nao for root
+    strcpy(path_aux, "");
     while (numCluster != 0)
     {
         if (buscarCluster(numCluster, clus, arqDados))
@@ -328,17 +355,17 @@ int getPathFromClusToRoot(BYTE numCluster, char *path)
     strcat(path_aux, path);
 
     int tam = strlen(path_aux);
-    strcpy(path,"");
-    i = tam- 1;
-    while(i>=0)
+    strcpy(path, "");
+    i = tam - 1;
+    while (i >= 0)
     {
         while ((path_aux[i] != '/') && i >= 0)
             i--;
-        if(i>=0)
+        if (i >= 0)
         {
             path_aux[i] = '\0';
             strcat(path, path_aux + i + 1);
-            strcat(path,"/");
+            strcat(path, "/");
         }
         else
             strcat(path, path_aux);
@@ -351,13 +378,12 @@ int getPathFromClusToRoot(BYTE numCluster, char *path)
 }
 int clusIsInsideOfClusN(Cluster *clus, BYTE clusN, FILE *arqDados)
 {
-    while(clus->cluster_pai != END_OF_FILE)
+    while (clus->cluster_pai != END_OF_FILE)
     {
-        if(clus->cluster_number == clusN)
+        if (clus->cluster_number == clusN)
             return 1;
-        if(buscarCluster(clus->cluster_pai,clus,arqDados))
+        if (buscarCluster(clus->cluster_pai, clus, arqDados))
             return 1;
     }
     return 0;
 }
-

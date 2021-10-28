@@ -530,6 +530,8 @@ int MKDIR_function(Arguments *arguments)
     fclose(arqDados);
     return 0;
 }
+//---------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 int EDIT_function(Arguments *arguments)
 {
     FILE *arqDados;
@@ -724,6 +726,8 @@ int EDIT_function(Arguments *arguments)
     fclose(arqDados);
     return 0;
 }
+//---------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 int RENAME_function(Arguments *arguments)
 {
     FILE *arqDados;
@@ -924,6 +928,8 @@ int RENAME_function(Arguments *arguments)
 
     return 0;
 }
+//---------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 int MOVE_function(Arguments *arguments)
 {
     FILE *arqDados;
@@ -952,7 +958,7 @@ int MOVE_function(Arguments *arguments)
     strcpy(arg_cpy, arguments->args);
     strcpy(path_file, strtok(arguments->args, " "));
     teste = strtok(NULL, "\0");
-    // faz o trim do caminho pro dir
+    // trim pra caso tenho espacos em branco entre argumentos
     i = 0;
     while (teste[i] == ' ')
     {
@@ -1036,7 +1042,7 @@ int MOVE_function(Arguments *arguments)
 
     // invalida esse metafile no dir que estamos agora(estamos no dir pai do arquivo/pasta que queremos mover)
     // só que vvamos fazer isso no final do programa, pq caso o path do segundo argumento seja invalido ou coisa do tipo
-    // daí vamo so remover esse cluster daqui e ngm mais vai poder acessar ele
+    // daí nao acontece de esse cluster ser removido e o programa falhar
     cluster_para_invalidar = cluster_atual;
     numero_metafile_invalidar = metafile_n;
     // fecha pra chamar a CD
@@ -1141,16 +1147,19 @@ int MOVE_function(Arguments *arguments)
     fclose(arqDados);
     return 0;
 }
+//---------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 int EXIT_function(Arguments *arguments)
 {
     printf("\n Desligando... \n");
     exit(0);
 }
+//---------------------------------------------------------------------------------------
 int RESET_function(Arguments *arguments)
 {
     FileSystem *arq = (FileSystem *)malloc(sizeof(FileSystem));
     FILE *arqDados;
-    
+
     if ((arqDados = fopen("arqDados", "rb+")) == NULL)
     {
         printf("[ERROR] Opening file error\n\n");
