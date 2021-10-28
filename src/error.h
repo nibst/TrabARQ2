@@ -51,9 +51,9 @@ int errorEditingIndexTable(char *arg_copy, Cluster *clus, DirectoryFile *dir, FI
 
 int errorCannotEditDir(char *caminho_arquivo, char *conteudo_arquivo, Cluster *clus, DirectoryFile *dir, FILE *arqDados);
 
+int errorCannotTypeDir(char *caminho_arquivo, Cluster *clus, DirectoryFile *dir, FILE *arqDados);
+
 // mensagem de error, da free em clus, dir e arg_copy, fclose em arqDados e retorna 1
 int errorCannotAlterRoot(char *arg_copy, Cluster *clus, DirectoryFile *dir);
 
-int errorHigherHierarchyToLower(MetaFiles *meta, char *arg_cpy, char *path_file,Cluster *clus, DirectoryFile *dir, FILE *arqDados);
-
-
+int errorHigherHierarchyToLower(MetaFiles *meta, char *arg_cpy, char *path_file, Cluster *clus, DirectoryFile *dir, FILE *arqDados);

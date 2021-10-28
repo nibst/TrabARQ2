@@ -37,6 +37,7 @@ int MKFILE_function(Arguments *arguments);
 int EDIT_function(Arguments *arguments);
 int MOVE_function(Arguments *arguments);
 int RENAME_function(Arguments *arguments);
+int TYPE_function(Arguments *arguments);
 int EXIT_function(Arguments *arguments);
 int RESET_function(Arguments *arguments);
 

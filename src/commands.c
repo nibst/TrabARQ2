@@ -1136,6 +1136,125 @@ int MOVE_function(Arguments *arguments)
     fclose(arqDados);
     return 0;
 }
+
+int TYPE_function(Arguments *arguments)
+{
+    FILE *arqDados;
+    Cluster *clus = (Cluster *)malloc(sizeof(Cluster));
+    DirectoryFile *dir = (DirectoryFile *)malloc(sizeof(DirectoryFile));
+    char nome[TAM_NOME_MAX];
+    char extensao[TAM_EXTENSAO] = "bin"; // caso usuario nao de extensao
+    char arquivo[TAM_NOME_MAX + TAM_EXTENSAO + 1];
+    char *teste = (char *)malloc(sizeof(char) * strlen(arguments->args) + 1);
+    char *caminho_original = (char *)malloc(sizeof(char) * strlen(arguments->args) + 1);
+
+    int metafile_n;
+    BYTE i = 0, cluster_atual, aux;
+
+    if (arguments->num_args != arguments->owner->expected_args)
+    {
+        printf("[ERROR] Expected %u arguments but got %u: '%s'\n\n", arguments->owner->expected_args, arguments->num_args, arguments->args);
+        free(teste);
+        free(clus);
+        free(dir);
+        free(caminho_original);
+        return 1;
+    }
+
+    strcpy(caminho_original, arguments->args);
+
+    // separa o caminho em path e arquivo
+    getPathToFile(arguments->args, arquivo);
+
+    cluster_atual = arguments->cluster_atual;
+
+    if (arguments->args == NULL || strlen(arguments->args) == 0) {
+        free(teste);
+        return errorCannotTypeDir(caminho_original, clus, dir, arqDados);
+    }
+
+    // faz CD na pasta onde está o arquivo para exibir
+    if (CD_function(arguments))
+    {
+        free(clus);
+        free(teste);
+        free(dir);
+        free(caminho_original);
+        return 1;
+    }
+    // essa funcao não deve alterar o cluster que o programa se encontra (arguments->cluster_atual)
+    aux = arguments->cluster_atual;
+    arguments->cluster_atual = cluster_atual;
+    cluster_atual = aux;
+
+    if ((arqDados = fopen("arqDados", "rb+")) == NULL)
+    {
+        free(teste);
+        free(caminho_original);
+        return errorOpeningFile(clus, dir, arqDados);
+    }
+
+    // pega o cluster do arqDados e coloca no clus
+    if (buscarCluster(cluster_atual, clus, arqDados) != 0)
+    {
+        free(teste);
+        free(caminho_original);
+        return errorGettingCluster(clus, dir, arqDados);
+    }
+
+    memcpy(dir, clus->conteudo, sizeof(DirectoryFile));
+
+    // separa nome da extensao
+    strcpy(teste, strtok(arquivo, ". \n"));
+    if (strlen(teste) >= TAM_NOME_MAX) // garante q o nome tem um tam aceito
+    {
+        truncaNome(teste);
+    }
+    strcpy(nome, teste);
+
+    // testa se o usuario colocou sequer uma extensao
+    if ((teste = strtok(NULL, ". \n")) != NULL)
+        strcpy(extensao, teste);
+    // procura o arquivo a ser editado na pasta indicada
+    if ((metafile_n = getIndexMeta(dir, nome, extensao)) == -1)
+    {
+        free(teste);
+        return errorFileDoesNotExist(caminho_original, clus, dir, arqDados);
+    }
+    // se achou pelo nome, testa se o arquivo eh valido
+    if ((validMetafile(dir->metafiles[metafile_n])))
+    {
+        // apontar o i pro proximo cluster que tem o conteudo do txt
+        i = dir->metafiles[metafile_n].cluster_inicial;
+    }
+    else
+    {
+        free(teste);
+        return errorFileDoesNotExist(caminho_original, clus, dir, arqDados);
+    }
+    // colocar em clus o cluster do txt a ser editado
+    if (buscarCluster(i, clus, arqDados) != 0)
+    {
+        free(teste);
+        free(caminho_original);
+        return errorGettingCluster(clus, dir, arqDados);
+    }
+    // se for dir da error pq so pode editar .txt
+    if (clus->cluster_type == CLUSTER_TYPE_DIRECTORY_TABLE) // testa se eh diretorio
+    {
+        free(teste);
+        return errorCannotTypeDir(caminho_original, clus, dir, arqDados);
+    }
+
+    printf("%s \n\n", clus->conteudo);
+
+    free(clus);
+    free(dir);
+    free(caminho_original);
+    fclose(arqDados);
+    return 0;
+}
+
 int EXIT_function(Arguments *arguments)
 {
     printf("\n Desligando... \n");
@@ -1160,34 +1279,60 @@ int RESET_function(Arguments *arguments)
 //---------------------------------------------------------------------------------------
 
 Command commands[NCOMMANDS] =
+{
     {
-        {.name = "CD",
-         .expected_args = 1u,
-         .func = &CD_function},
-        {.name = "DIR",
-         .expected_args = 0u,
-         .func = &DIR_function},
-        {.name = "RM",
-         .expected_args = 1u,
-         .func = &RM_function},
-        {.name = "MKDIR",
-         .expected_args = 1u,
-         .func = &MKDIR_function},
-        {.name = "MKFILE",
-         .expected_args = 1u,
-         .func = &MKFILE_function},
-        {.name = "EDIT",
-         .expected_args = 2u,
-         .func = &EDIT_function},
-        {.name = "MOVE",
-         .expected_args = 2u,
-         .func = &MOVE_function},
-        {.name = "RENAME",
-         .expected_args = 2u,
-         .func = &RENAME_function},
-        {.name = "EXIT",
-         .expected_args = 0u,
-         .func = &EXIT_function},
-        {.name = "RESET",
-         .expected_args = 0u,
-         .func = &RESET_function}};
+        .name = "CD",
+        .expected_args = 1u,
+        .func = &CD_function
+    },
+    {
+        .name = "DIR",
+        .expected_args = 0u,
+        .func = &DIR_function
+    },
+    {
+        .name = "RM",
+        .expected_args = 1u,
+        .func = &RM_function
+    },
+    {
+        .name = "MKDIR",
+        .expected_args = 1u,
+        .func = &MKDIR_function
+    },
+    {
+        .name = "MKFILE",
+        .expected_args = 1u,
+        .func = &MKFILE_function
+    },
+    {
+        .name = "EDIT",
+        .expected_args = 2u,
+        .func = &EDIT_function
+    },
+    {
+        .name = "MOVE",
+        .expected_args = 2u,
+        .func = &MOVE_function
+    },
+    {
+        .name = "RENAME",
+        .expected_args = 2u,
+        .func = &RENAME_function
+    },
+    {
+        .name = "TYPE",
+        .expected_args = 1u,
+        .func = &TYPE_function
+    },
+    {
+        .name = "EXIT",
+        .expected_args = 0u,
+        .func = &EXIT_function
+    },
+    {
+        .name = "RESET",
+        .expected_args = 0u,
+        .func = &RESET_function
+    }
+};

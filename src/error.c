@@ -138,6 +138,15 @@ int errorCannotEditDir(char *caminho_arquivo, char *conteudo_arquivo, Cluster *c
     fclose(arqDados);
     return 1;
 }
+int errorCannotTypeDir(char *caminho_arquivo, Cluster *clus, DirectoryFile *dir, FILE *arqDados)
+{
+    printf("[ERROR] Cannot type a directory\n\n");
+    free(clus);
+    free(dir);
+    free(caminho_arquivo);
+    fclose(arqDados);
+    return 1;
+}
 int errorCannotAlterRoot(char *arg_copy, Cluster *clus, DirectoryFile *dir)
 {
     printf("[ERROR] Cannot alter root\n\n");
