@@ -3,20 +3,22 @@
 ///
 ///             Alunos:
 ///                     (00326477)  Felipe Kaiser Schnitzler
-///                     (00323741)  Níkolas Padão
+///                     (00323741)  Nikolas Padão
 ///                     (00275960)  Pedro Afonso Tremea Serpa
-///                     (00xxxxxx)  Ricardo
+///                     (00325735)  Ricardo Hermes Dalcin
 
 #include <stdio.h>
 
+#define INI_INDICE 8 // oitavo byte
+#define INI_ROOT 264 // 256(indices) + 4x2(metadados de 2 bytes)
 #define NUM_INDICES 256
 #define NUM_CLUSTERS 256
 #define CLUSTER_SIZE 32768
 #define CLUSTER_TYPE_DATA 0x01
 #define CLUSTER_TYPE_DIRECTORY_TABLE 0x02
-#define TAM_NOME_MAX 16
+#define TAM_NOME_MAX 121
 #define TAM_EXTENSAO 4 //uma a mais pro fim de string
-#define NUM_METAFILES 1488
+#define NUM_METAFILES 257 //tem a mais do que é possível, mas enfim é a melhor divisao sem deixar muitos bytes sem nada
 #define INVALIDO 0x00
 #define VALIDO 0x01
 #define VAZIO 0x00
@@ -44,28 +46,27 @@ typedef struct Type_MetaFiles
 
 typedef struct Type_DirectoryFile
 {
-    //BYTE valida;//se for valida é 1, se não é 0, ser 0 seria basicamente remover, nao sei se eh necessario aqui ja que tem ja nos metafiles
     char nomeDir[TAM_NOME_MAX];
     char extensao[TAM_EXTENSAO];
-    MetaFiles metafiles[NUM_METAFILES];//!!sla quantos, pode ter varios dps calculo
-
+    MetaFiles metafiles[NUM_METAFILES];
 }DirectoryFile;
 
-//tem que ter 32kb
+//tem que ter 32kb -> 32768
 typedef struct Type_Cluster
 {
     BYTE cluster_type;//como vai ser interpretado os dados a seguir
-    BYTE conteudo[CLUSTER_SIZE - (2 * sizeof(BYTE))];
+    BYTE conteudo[CLUSTER_SIZE - (3 * sizeof(BYTE))];
+    BYTE cluster_pai; //se igual a END_OF_FILE quer dizer q esse cluster n tem pai
     BYTE cluster_number;//cluster em que está->vai checar a tabela de indices e apontar pro proximo cluster
+
 
 }Cluster;
 
 typedef struct Type_FileSystem
 {
     MetaDados meta;
-    BYTE indice[NUM_INDICES];//TODO colocar como constante, o indice i aponta o proximo cluster do cluster de numero i.
-    Cluster clusters[NUM_CLUSTERS];//TODO colocar como constante
-
+    BYTE indice[NUM_INDICES];
+    Cluster clusters[NUM_CLUSTERS];
 } FileSystem;
 
 void inicializaMetadados(MetaDados *meta);
@@ -74,20 +75,15 @@ void inicializaIndex(BYTE *ind);
 
 void inicializaClusters(Cluster *clus);
 
-//fazer funcao de ler e armazenar arquivo binario
+//escreve todo o file system
 int writeFileSystem(FileSystem *arq);
-
-int readFileSystem(FileSystem *arq);
 
 void inicializaArquivo(FileSystem *arq);
 
 int writeBlockOfData(BYTE cluster,int offset,int sizeBlock, BYTE *data,FILE *arqDados);
 
-//pega o cluster root
-int getFirstCluster(Cluster *clus,FILE *arqDados);
-
 //retorna o indice do 1 cluster vazio, EOF caso ocorra algum erro
-int getEmptyCluster(FILE *arqDados);
+int getEmptyCluster(FILE *arqDados, MetaDados meta);
 
 //insere o cluster correspondente ao indice x em clus, retorna 1 caso ocorra algum erro
 int buscarCluster(BYTE x, Cluster *clus, FILE *arqDados);
@@ -96,7 +92,7 @@ int buscarCluster(BYTE x, Cluster *clus, FILE *arqDados);
 BYTE getArq(DirectoryFile *dir, char nome[]);
 
 //retorna o endereco do byte do cluster de indice x(ex calcEndCluster(0) = 264)
-int calcEndCluster(BYTE x);
+int calcEndCluster(BYTE x, MetaDados meta);
 
 //aloca um cluster na memoria
 //nao altera o conteudo do cluster
@@ -110,7 +106,14 @@ int mudaEstadoIndex(BYTE index, BYTE novoEstado, FILE *arqDados);
 int getValorIndex(BYTE index, FILE *arqDados, BYTE *value);
 
 // retorna o indice do metadado do arquivo/dir com o nome[] dentro de *dir, -1 para erro
-int getIndexMeta(DirectoryFile *dir, char nome[]);
+int getIndexMeta(DirectoryFile *dir, char nome[], char extensao[]);
 
 // retorna o numero de metadados validos no diretorio, retorna 0 se for um arquivo txt,-1 caso ocorra algum erro
 int nrMetaFiles(FILE *arqDados, BYTE index);
+
+//Monta o caminho do root até certa pasta a partir dessa certa pasta(faz o caminho inverso pasta->root)
+int getPathFromClusToRoot(BYTE numCluster, char *path);
+
+//retorna 1 se o cluster está dentro do clusN ou se são o msm cluster
+//retorna 0 caso o contrario
+int clusIsInsideOfClusN(Cluster *clus, BYTE clusN, FILE *arqDados);
