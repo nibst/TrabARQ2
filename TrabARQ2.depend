@@ -1,0 +1,27 @@
+# depslib dependency file v1.0
+1635074440 source:d:\my documents\source\trabarq2\src\arquivos.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"arquivos.h"
+
+1635074444 d:\my documents\source\trabarq2\src\arquivos.h
+	<stdio.h>
+
+1635103955 source:d:\my documents\source\trabarq2\src\commands.c
+	"commands.h"
+	"arquivos.h"
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+
+1635074447 d:\my documents\source\trabarq2\src\commands.h
+
+1635077893 source:d:\my documents\source\trabarq2\src\main.c
+	"commands.h"
+	"arquivos.h"
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<ctype.h>
+
