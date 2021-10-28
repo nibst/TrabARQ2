@@ -86,24 +86,24 @@ int writeFileSystem(FileSystem *arq)
 }
 int readMetaDados(MetaDados *meta, FILE *arqDados)
 {
-    if (fseek(arqDados, 0, SEEK_SET))
+    if(fseek(arqDados, 0, SEEK_SET))
     {
         return 1;
     }
-    if (fread(meta, sizeof(MetaDados), 1, arqDados) != 1)
+    if(fread(meta,sizeof(MetaDados),1,arqDados) != 1)
     {
         return 1;
     }
     return 0;
+
 }
 // escreve um dado de tamanho escolhido no parametro em um cluster escolhido no parametro e em certo offset dentro do cluster
 int writeBlockOfData(BYTE cluster, int offset, int sizeBlock, BYTE *data, FILE *arqDados)
 {
     MetaDados meta;
-
+    readMetaDados(&meta,arqDados);
     int end_cluster = calcEndCluster(cluster, meta);
-    if (readMetaDados(&meta, arqDados))
-        return 1;
+
     if ((fseek(arqDados, offset + end_cluster, SEEK_SET)))
     {
         return 1;
@@ -139,8 +139,7 @@ int getEmptyCluster(FILE *arqDados, MetaDados meta)
 int buscarCluster(BYTE numCluster, Cluster *clus, FILE *arqDados)
 {
     MetaDados meta;
-    if (readMetaDados(&meta, arqDados))
-        return 1;
+    readMetaDados(&meta,arqDados);
 
     if ((fseek(arqDados, calcEndCluster(numCluster, meta), SEEK_SET)))
     {
@@ -184,10 +183,10 @@ int calcEndCluster(BYTE x, MetaDados meta)
 int criaCluster(char extensao[], FILE *arqDados, BYTE *index)
 {
     MetaDados meta;
+    readMetaDados(&meta,arqDados);
     BYTE tipocluster;
-    if (readMetaDados(&meta, arqDados))
-        return 1;
-    *index = getEmptyCluster(arqDados, meta);
+
+    *index = getEmptyCluster(arqDados,meta);
 
     if (*index == END_OF_FILE)
     {
@@ -199,7 +198,7 @@ int criaCluster(char extensao[], FILE *arqDados, BYTE *index)
         return 1;
     }
 
-    if ((fseek(arqDados, calcEndCluster(*index, meta), SEEK_SET)))
+    if ((fseek(arqDados, calcEndCluster(*index,meta), SEEK_SET)))
     {
         return 1;
     }
@@ -226,8 +225,7 @@ int criaCluster(char extensao[], FILE *arqDados, BYTE *index)
 int mudaEstadoIndex(BYTE index, BYTE novoEstado, FILE *arqDados)
 {
     MetaDados meta;
-    if (readMetaDados(&meta, arqDados))
-        return 1;
+    readMetaDados(&meta,arqDados);
     if ((fseek(arqDados, (meta.inicio_indices + index), SEEK_SET)))
     {
         return 1;
@@ -244,8 +242,7 @@ int mudaEstadoIndex(BYTE index, BYTE novoEstado, FILE *arqDados)
 int getValorIndex(BYTE index, FILE *arqDados, BYTE *value)
 {
     MetaDados meta;
-    if (readMetaDados(&meta, arqDados))
-        return 1;
+    readMetaDados(&meta,arqDados);
     if ((fseek(arqDados, (meta.inicio_indices + index), SEEK_SET)))
     {
         return 1;
@@ -306,7 +303,7 @@ int nrMetaFiles(FILE *arqDados, BYTE numCluster)
     return cont;
 }
 
-// Monta o caminho do root até certa pasta a partir dessa certa pasta(faz o caminho inverso pasta->root)
+//Monta o caminho do root até certa pasta a partir dessa certa pasta(faz o caminho inverso pasta->root)
 int getPathFromClusToRoot(BYTE numCluster, char *path)
 {
     FILE *arqDados;
@@ -321,8 +318,8 @@ int getPathFromClusToRoot(BYTE numCluster, char *path)
         free(path_aux);
         return 1;
     }
-    // enquanto cluster nao for root
-    strcpy(path_aux, "");
+    //enquanto cluster nao for root
+    strcpy(path_aux,"");
     while (numCluster != 0)
     {
         if (buscarCluster(numCluster, clus, arqDados))
@@ -355,17 +352,17 @@ int getPathFromClusToRoot(BYTE numCluster, char *path)
     strcat(path_aux, path);
 
     int tam = strlen(path_aux);
-    strcpy(path, "");
-    i = tam - 1;
-    while (i >= 0)
+    strcpy(path,"");
+    i = tam- 1;
+    while(i>=0)
     {
         while ((path_aux[i] != '/') && i >= 0)
             i--;
-        if (i >= 0)
+        if(i>=0)
         {
             path_aux[i] = '\0';
             strcat(path, path_aux + i + 1);
-            strcat(path, "/");
+            strcat(path,"/");
         }
         else
             strcat(path, path_aux);
@@ -378,12 +375,15 @@ int getPathFromClusToRoot(BYTE numCluster, char *path)
 }
 int clusIsInsideOfClusN(Cluster *clus, BYTE clusN, FILE *arqDados)
 {
-    while (clus->cluster_pai != END_OF_FILE)
+    Cluster *clus_cpy = (Cluster *)malloc(sizeof(Cluster));
+    memcpy(clus_cpy,clus,sizeof(Cluster));
+    while(clus_cpy->cluster_pai != END_OF_FILE)
     {
-        if (clus->cluster_number == clusN)
+        if(clus_cpy->cluster_number == clusN)
             return 1;
-        if (buscarCluster(clus->cluster_pai, clus, arqDados))
+        if(buscarCluster(clus_cpy->cluster_pai,clus_cpy,arqDados))
             return 1;
     }
     return 0;
 }
+

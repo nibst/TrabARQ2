@@ -1,0 +1,3 @@
+Funcao RM não considera se arquivo esta em mais de um cluster-> se tiver em mais de um cluster esses clusters tem que apontar pra 0 na tabela
+Se remover o dir que tu está agora, digamos CD root/sla, aí RM root/sla. Na nossa interface vai ficar dizendo que estamos no root/sla ainda, mas ele n existe
+Na main, na função de contar argumentos e tals, considerar argumentos entre aspas como só um argumento

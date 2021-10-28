@@ -1036,15 +1036,12 @@ int MOVE_function(Arguments *arguments)
     // copia os dados daquele metafile para depois colar no endereço onde quer mover
     memcpy(meta, &(dir->metafiles[metafile_n]), sizeof(MetaFiles));
 
-    // se o cluster movido for o mesmo em que o programa estava quando chamou esse comando, eu volto pro cluster pai
-    if (isDirectory(*meta) && (arguments->cluster_atual == meta->cluster_inicial))
-        arguments->cluster_atual = clus->cluster_pai;
-
     // invalida esse metafile no dir que estamos agora(estamos no dir pai do arquivo/pasta que queremos mover)
     // só que vvamos fazer isso no final do programa, pq caso o path do segundo argumento seja invalido ou coisa do tipo
     // daí nao acontece de esse cluster ser removido e o programa falhar
     cluster_para_invalidar = cluster_atual;
     numero_metafile_invalidar = metafile_n;
+    dirPai = clus->cluster_number;
     // fecha pra chamar a CD
     fclose(arqDados);
     strcpy(arguments->args, path_dir);
@@ -1097,6 +1094,14 @@ int MOVE_function(Arguments *arguments)
             free(path_file);
             return errorFileAlreadyExist(clus, dir, arqDados);
         }
+    }
+    // se o cluster movido for o mesmo em que o programa estava quando chamou esse comando, eu volto pro cluster pai
+    if (isDirectory(*meta) && (arguments->cluster_atual == meta->cluster_inicial))
+    {
+        if(dirPai != END_OF_FILE)
+            arguments->cluster_atual = dirPai;
+        else
+            arguments->cluster_atual = 0x00;
     }
     i = 0;
     // escolhe um lugar que não seja valido pra colocar a file/pasta que estamos movendo
